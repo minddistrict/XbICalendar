@@ -59,6 +59,8 @@
 		277F39281E893345007A5A3D /* XbICAddViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 946E26E91B0F6B5F00418534 /* XbICAddViewController.m */; };
 		277F392B1E893372007A5A3D /* XbICalendar.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 277F38E61E890B84007A5A3D /* XbICalendar.framework */; };
 		277F392C1E89339A007A5A3D /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F12F48FB19332EA4003631C5 /* main.m */; };
+		277F39301E894005007A5A3D /* recur.ics in Resources */ = {isa = PBXBuildFile; fileRef = 277F392F1E894005007A5A3D /* recur.ics */; };
+		277F39321E894026007A5A3D /* XbICalendarRecurTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277F39311E894026007A5A3D /* XbICalendarRecurTests.swift */; };
 		4D0767EC197ADF440017ED72 /* overlaps.ics in Resources */ = {isa = PBXBuildFile; fileRef = 4D0767EB197ADF440017ED72 /* overlaps.ics */; };
 		4D0767F0197AE41A0017ED72 /* process-calendar.ics in Resources */ = {isa = PBXBuildFile; fileRef = 4D0767EF197AE41A0017ED72 /* process-calendar.ics */; };
 		4D0767F4197AFE200017ED72 /* process-incoming.ics in Resources */ = {isa = PBXBuildFile; fileRef = 4D0767F3197AFE200017ED72 /* process-incoming.ics */; };
@@ -125,6 +127,8 @@
 		277F38E81E890B84007A5A3D /* XbICalendar.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = XbICalendar.h; sourceTree = "<group>"; };
 		277F38E91E890B84007A5A3D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		277F39021E8926D2007A5A3D /* libical_ical_export.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = libical_ical_export.h; sourceTree = "<group>"; };
+		277F392F1E894005007A5A3D /* recur.ics */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = recur.ics; sourceTree = "<group>"; };
+		277F39311E894026007A5A3D /* XbICalendarRecurTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = XbICalendarRecurTests.swift; sourceTree = "<group>"; };
 		4D0767EB197ADF440017ED72 /* overlaps.ics */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = overlaps.ics; sourceTree = "<group>"; };
 		4D0767ED197ADF5C0017ED72 /* XbICalendarOverlapTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XbICalendarOverlapTests.m; sourceTree = "<group>"; };
 		4D0767EF197AE41A0017ED72 /* process-calendar.ics */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "process-calendar.ics"; sourceTree = "<group>"; };
@@ -332,6 +336,7 @@
 		F12F491419332EA5003631C5 /* XbICalendarTests */ = {
 			isa = PBXGroup;
 			children = (
+				277F39311E894026007A5A3D /* XbICalendarRecurTests.swift */,
 				F12F491519332EA5003631C5 /* Supporting Files */,
 				F12F492919333E1A003631C5 /* TestData */,
 				4DC71134197B4A6A003D4962 /* XbICalendar2445Tests.m */,
@@ -397,6 +402,7 @@
 		F12F492919333E1A003631C5 /* TestData */ = {
 			isa = PBXGroup;
 			children = (
+				277F392F1E894005007A5A3D /* recur.ics */,
 				F12F492A19333E35003631C5 /* 2445.ics */,
 				4DAE352A19720D050097A2D6 /* 2446.ics */,
 				4DAE3531197370380097A2D6 /* calendar.ics */,
@@ -619,6 +625,7 @@
 				4DAE352B19720D050097A2D6 /* 2446.ics in Resources */,
 				4DA795251979F12E0033A008 /* large.ics in Resources */,
 				4DC71129197B32C3003D4962 /* smallcluster.ics in Resources */,
+				277F39301E894005007A5A3D /* recur.ics in Resources */,
 				F12F492B19333E35003631C5 /* 2445.ics in Resources */,
 				4DAE3536197379190097A2D6 /* classify.ics in Resources */,
 				4DC7112A197B32C3003D4962 /* spanlist.ics in Resources */,
@@ -670,6 +677,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				277F391C1E8932AB007A5A3D /* XbICalendar2445Tests.swift in Sources */,
+				277F39321E894026007A5A3D /* XbICalendarRecurTests.swift in Sources */,
 				277F39091E893174007A5A3D /* XbICalendar2445Tests.m in Sources */,
 				277F390A1E893174007A5A3D /* XbICalendar2446Tests.m in Sources */,
 				277F390B1E893174007A5A3D /* XbICalendarCalendarTests.m in Sources */,
