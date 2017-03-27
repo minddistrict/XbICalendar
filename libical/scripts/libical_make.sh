@@ -60,8 +60,8 @@ export LDFLAGS="-L$SDKROOT/usr/lib/ -arch $ARCH"
 export CLANG=$DEVROOT/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang
 
 
-export CC=$CLANG
-export CXX=$CLANG++
+export CC="$CLANG -fembed-bitcode"
+export CXX="$CLANG -fembed-bitcode"
 export LD=$DEVROOT/usr/bin/ld
 export AR=$DEVROOT/usr/bin/ar
 export AS=$DEVROOT/usr/bin/as
