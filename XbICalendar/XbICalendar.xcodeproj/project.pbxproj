@@ -7,6 +7,28 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		277F38EA1E890B84007A5A3D /* XbICalendar.h in Headers */ = {isa = PBXBuildFile; fileRef = 277F38E81E890B84007A5A3D /* XbICalendar.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		277F38EE1E890BB6007A5A3D /* libical.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F148A222194700DD00ED2C6E /* libical.a */; };
+		277F38EF1E890BC2007A5A3D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F12F48EF19332EA4003631C5 /* Foundation.framework */; };
+		277F38F11E89269B007A5A3D /* XbICComponent.m in Sources */ = {isa = PBXBuildFile; fileRef = F12F4E4019346A41003631C5 /* XbICComponent.m */; };
+		277F38F21E89269B007A5A3D /* XbICFile.m in Sources */ = {isa = PBXBuildFile; fileRef = F12F4927193338CB003631C5 /* XbICFile.m */; };
+		277F38F31E89269B007A5A3D /* XbICPerson.m in Sources */ = {isa = PBXBuildFile; fileRef = F1DC7726193F208500DB07D4 /* XbICPerson.m */; };
+		277F38F41E89269B007A5A3D /* XbICProperty.m in Sources */ = {isa = PBXBuildFile; fileRef = F12F4E4419346AB6003631C5 /* XbICProperty.m */; };
+		277F38F51E89269B007A5A3D /* XbICVCalendar.m in Sources */ = {isa = PBXBuildFile; fileRef = F12F4E481935B259003631C5 /* XbICVCalendar.m */; };
+		277F38F61E89269B007A5A3D /* XbICVEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = F12F4E4C1935CF03003631C5 /* XbICVEvent.m */; };
+		277F38F71E89269B007A5A3D /* XbICZoneDirectory.m in Sources */ = {isa = PBXBuildFile; fileRef = F1FAB5FF1945B057005D0B35 /* XbICZoneDirectory.m */; };
+		277F38F81E89269B007A5A3D /* XbICInvite.m in Sources */ = {isa = PBXBuildFile; fileRef = F18820251990A41A00177998 /* XbICInvite.m */; };
+		277F38F91E8926AA007A5A3D /* XbICalendar.h in Headers */ = {isa = PBXBuildFile; fileRef = F12F492519333899003631C5 /* XbICalendar.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		277F38FA1E8926AA007A5A3D /* XbICComponent.h in Headers */ = {isa = PBXBuildFile; fileRef = F12F4E3F19346A41003631C5 /* XbICComponent.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		277F38FB1E8926AA007A5A3D /* XbICFile.h in Headers */ = {isa = PBXBuildFile; fileRef = F12F4926193338CB003631C5 /* XbICFile.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		277F38FC1E8926AA007A5A3D /* XbICPerson.h in Headers */ = {isa = PBXBuildFile; fileRef = F1DC7725193F208500DB07D4 /* XbICPerson.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		277F38FD1E8926AA007A5A3D /* XbICProperty.h in Headers */ = {isa = PBXBuildFile; fileRef = F12F4E4319346AB6003631C5 /* XbICProperty.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		277F38FE1E8926AA007A5A3D /* XbICVCalendar.h in Headers */ = {isa = PBXBuildFile; fileRef = F12F4E471935B259003631C5 /* XbICVCalendar.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		277F38FF1E8926AA007A5A3D /* XbICVEvent.h in Headers */ = {isa = PBXBuildFile; fileRef = F12F4E4B1935CF03003631C5 /* XbICVEvent.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		277F39001E8926AA007A5A3D /* XbICZoneDirectory.h in Headers */ = {isa = PBXBuildFile; fileRef = F1FAB5FE1945B057005D0B35 /* XbICZoneDirectory.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		277F39011E8926AA007A5A3D /* XbICInvite.h in Headers */ = {isa = PBXBuildFile; fileRef = F18820241990A41A00177998 /* XbICInvite.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		277F39031E8926E2007A5A3D /* libical_ical_export.h in Headers */ = {isa = PBXBuildFile; fileRef = 277F39021E8926D2007A5A3D /* libical_ical_export.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		277F39041E892740007A5A3D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F12F48F319332EA4003631C5 /* UIKit.framework */; };
 		4D0767EC197ADF440017ED72 /* overlaps.ics in Resources */ = {isa = PBXBuildFile; fileRef = 4D0767EB197ADF440017ED72 /* overlaps.ics */; };
 		4D0767EE197ADF5C0017ED72 /* XbICalendarOverlapTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D0767ED197ADF5C0017ED72 /* XbICalendarOverlapTests.m */; };
 		4D0767F0197AE41A0017ED72 /* process-calendar.ics in Resources */ = {isa = PBXBuildFile; fileRef = 4D0767EF197AE41A0017ED72 /* process-calendar.ics */; };
@@ -106,6 +128,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		277F38E61E890B84007A5A3D /* XbICalendar.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = XbICalendar.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		277F38E81E890B84007A5A3D /* XbICalendar.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = XbICalendar.h; sourceTree = "<group>"; };
+		277F38E91E890B84007A5A3D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		277F39021E8926D2007A5A3D /* libical_ical_export.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = libical_ical_export.h; sourceTree = "<group>"; };
 		4D0767EB197ADF440017ED72 /* overlaps.ics */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = overlaps.ics; sourceTree = "<group>"; };
 		4D0767ED197ADF5C0017ED72 /* XbICalendarOverlapTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XbICalendarOverlapTests.m; sourceTree = "<group>"; };
 		4D0767EF197AE41A0017ED72 /* process-calendar.ics */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "process-calendar.ics"; sourceTree = "<group>"; };
@@ -194,6 +220,16 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		277F38E21E890B84007A5A3D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				277F39041E892740007A5A3D /* UIKit.framework in Frameworks */,
+				277F38EF1E890BC2007A5A3D /* Foundation.framework in Frameworks */,
+				277F38EE1E890BB6007A5A3D /* libical.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		F12F48E919332EA4003631C5 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -220,6 +256,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		277F38E71E890B84007A5A3D /* XbICalendar */ = {
+			isa = PBXGroup;
+			children = (
+				277F38E81E890B84007A5A3D /* XbICalendar.h */,
+				277F38E91E890B84007A5A3D /* Info.plist */,
+			);
+			path = XbICalendar;
+			sourceTree = "<group>";
+		};
 		F12F48E319332EA4003631C5 = {
 			isa = PBXGroup;
 			children = (
@@ -227,6 +272,7 @@
 				F12F49241933385D003631C5 /* XbICalendar */,
 				F12F48F519332EA4003631C5 /* XbICalendarExample */,
 				F12F491419332EA5003631C5 /* XbICalendarTests */,
+				277F38E71E890B84007A5A3D /* XbICalendar */,
 				F12F48EE19332EA4003631C5 /* Frameworks */,
 				F12F48ED19332EA4003631C5 /* Products */,
 			);
@@ -237,6 +283,7 @@
 			children = (
 				F12F48EC19332EA4003631C5 /* XbICalendarExample.app */,
 				F12F490D19332EA5003631C5 /* XbICalendarTests.xctest */,
+				277F38E61E890B84007A5A3D /* XbICalendar.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -396,6 +443,7 @@
 		F12F492F19345BF7003631C5 /* include */ = {
 			isa = PBXGroup;
 			children = (
+				277F39021E8926D2007A5A3D /* libical_ical_export.h */,
 				F12F492C19345BB2003631C5 /* ical.h */,
 			);
 			path = include;
@@ -419,7 +467,46 @@
 		};
 /* End PBXGroup section */
 
+/* Begin PBXHeadersBuildPhase section */
+		277F38E31E890B84007A5A3D /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				277F38EA1E890B84007A5A3D /* XbICalendar.h in Headers */,
+				277F38F91E8926AA007A5A3D /* XbICalendar.h in Headers */,
+				277F38FA1E8926AA007A5A3D /* XbICComponent.h in Headers */,
+				277F38FB1E8926AA007A5A3D /* XbICFile.h in Headers */,
+				277F38FC1E8926AA007A5A3D /* XbICPerson.h in Headers */,
+				277F38FD1E8926AA007A5A3D /* XbICProperty.h in Headers */,
+				277F38FE1E8926AA007A5A3D /* XbICVCalendar.h in Headers */,
+				277F38FF1E8926AA007A5A3D /* XbICVEvent.h in Headers */,
+				277F39001E8926AA007A5A3D /* XbICZoneDirectory.h in Headers */,
+				277F39011E8926AA007A5A3D /* XbICInvite.h in Headers */,
+				277F39031E8926E2007A5A3D /* libical_ical_export.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
 /* Begin PBXNativeTarget section */
+		277F38E51E890B84007A5A3D /* XbICalendar */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 277F38EB1E890B84007A5A3D /* Build configuration list for PBXNativeTarget "XbICalendar" */;
+			buildPhases = (
+				277F38E11E890B84007A5A3D /* Sources */,
+				277F38E21E890B84007A5A3D /* Frameworks */,
+				277F38E31E890B84007A5A3D /* Headers */,
+				277F38E41E890B84007A5A3D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = XbICalendar;
+			productName = XbICalendar;
+			productReference = 277F38E61E890B84007A5A3D /* XbICalendar.framework */;
+			productType = "com.apple.product-type.framework";
+		};
 		F12F48EB19332EA4003631C5 /* XbICalendarExample */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = F12F491E19332EA5003631C5 /* Build configuration list for PBXNativeTarget "XbICalendarExample" */;
@@ -465,6 +552,10 @@
 				LastUpgradeCheck = 0510;
 				ORGANIZATIONNAME = GaltSoft;
 				TargetAttributes = {
+					277F38E51E890B84007A5A3D = {
+						CreatedOnToolsVersion = 8.2.1;
+						ProvisioningStyle = Automatic;
+					};
 					F12F490C19332EA4003631C5 = {
 						LastSwiftMigration = 0820;
 						TestTargetID = F12F48EB19332EA4003631C5;
@@ -486,11 +577,19 @@
 			targets = (
 				F12F48EB19332EA4003631C5 /* XbICalendarExample */,
 				F12F490C19332EA4003631C5 /* XbICalendarTests */,
+				277F38E51E890B84007A5A3D /* XbICalendar */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		277F38E41E890B84007A5A3D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		F12F48EA19332EA4003631C5 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -542,6 +641,21 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		277F38E11E890B84007A5A3D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				277F38F11E89269B007A5A3D /* XbICComponent.m in Sources */,
+				277F38F21E89269B007A5A3D /* XbICFile.m in Sources */,
+				277F38F31E89269B007A5A3D /* XbICPerson.m in Sources */,
+				277F38F41E89269B007A5A3D /* XbICProperty.m in Sources */,
+				277F38F51E89269B007A5A3D /* XbICVCalendar.m in Sources */,
+				277F38F61E89269B007A5A3D /* XbICVEvent.m in Sources */,
+				277F38F71E89269B007A5A3D /* XbICZoneDirectory.m in Sources */,
+				277F38F81E89269B007A5A3D /* XbICInvite.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		F12F48E819332EA4003631C5 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -637,6 +751,75 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		277F38EC1E890B84007A5A3D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CODE_SIGN_IDENTITY = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				INFOPLIST_FILE = XbICalendar/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/../libical/lib";
+				MTL_ENABLE_DEBUG_INFO = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.minddistrict.XbICalendar;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		277F38ED1E890B84007A5A3D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CODE_SIGN_IDENTITY = "";
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				INFOPLIST_FILE = XbICalendar/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/../libical/lib";
+				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = com.minddistrict.XbICalendar;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_VERSION = 3.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
 		F12F491C19332EA5003631C5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -805,6 +988,14 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		277F38EB1E890B84007A5A3D /* Build configuration list for PBXNativeTarget "XbICalendar" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				277F38EC1E890B84007A5A3D /* Debug */,
+				277F38ED1E890B84007A5A3D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
 		F12F48E719332EA4003631C5 /* Build configuration list for PBXProject "XbICalendar" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
