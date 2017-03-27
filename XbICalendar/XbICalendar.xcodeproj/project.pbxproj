@@ -27,8 +27,10 @@
 		277F38FF1E8926AA007A5A3D /* XbICVEvent.h in Headers */ = {isa = PBXBuildFile; fileRef = F12F4E4B1935CF03003631C5 /* XbICVEvent.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		277F39001E8926AA007A5A3D /* XbICZoneDirectory.h in Headers */ = {isa = PBXBuildFile; fileRef = F1FAB5FE1945B057005D0B35 /* XbICZoneDirectory.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		277F39011E8926AA007A5A3D /* XbICInvite.h in Headers */ = {isa = PBXBuildFile; fileRef = F18820241990A41A00177998 /* XbICInvite.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		277F39031E8926E2007A5A3D /* libical_ical_export.h in Headers */ = {isa = PBXBuildFile; fileRef = 277F39021E8926D2007A5A3D /* libical_ical_export.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		277F39031E8926E2007A5A3D /* libical_ical_export.h in Headers */ = {isa = PBXBuildFile; fileRef = 277F39021E8926D2007A5A3D /* libical_ical_export.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		277F39041E892740007A5A3D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F12F48F319332EA4003631C5 /* UIKit.framework */; };
+		277F39071E892E67007A5A3D /* XbICalendar.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 277F38E61E890B84007A5A3D /* XbICalendar.framework */; };
+		277F39081E892F50007A5A3D /* ical.h in Headers */ = {isa = PBXBuildFile; fileRef = F12F492C19345BB2003631C5 /* ical.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		4D0767EC197ADF440017ED72 /* overlaps.ics in Resources */ = {isa = PBXBuildFile; fileRef = 4D0767EB197ADF440017ED72 /* overlaps.ics */; };
 		4D0767EE197ADF5C0017ED72 /* XbICalendarOverlapTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D0767ED197ADF5C0017ED72 /* XbICalendarOverlapTests.m */; };
 		4D0767F0197AE41A0017ED72 /* process-calendar.ics in Resources */ = {isa = PBXBuildFile; fileRef = 4D0767EF197AE41A0017ED72 /* process-calendar.ics */; };
@@ -118,11 +120,11 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		F12F491219332EA5003631C5 /* PBXContainerItemProxy */ = {
+		277F39051E892E59007A5A3D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F12F48E419332EA4003631C5 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = F12F48EB19332EA4003631C5;
+			remoteGlobalIDString = 277F38E51E890B84007A5A3D;
 			remoteInfo = XbICalendar;
 		};
 /* End PBXContainerItemProxy section */
@@ -247,6 +249,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				277F39071E892E67007A5A3D /* XbICalendar.framework in Frameworks */,
 				F12F490F19332EA5003631C5 /* XCTest.framework in Frameworks */,
 				F12F491119332EA5003631C5 /* UIKit.framework in Frameworks */,
 				F12F491019332EA5003631C5 /* Foundation.framework in Frameworks */,
@@ -472,6 +475,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				277F39081E892F50007A5A3D /* ical.h in Headers */,
 				277F38EA1E890B84007A5A3D /* XbICalendar.h in Headers */,
 				277F38F91E8926AA007A5A3D /* XbICalendar.h in Headers */,
 				277F38FA1E8926AA007A5A3D /* XbICComponent.h in Headers */,
@@ -535,7 +539,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				F12F491319332EA5003631C5 /* PBXTargetDependency */,
+				277F39061E892E59007A5A3D /* PBXTargetDependency */,
 			);
 			name = XbICalendarTests;
 			productName = XbICalendarTests;
@@ -558,7 +562,6 @@
 					};
 					F12F490C19332EA4003631C5 = {
 						LastSwiftMigration = 0820;
-						TestTargetID = F12F48EB19332EA4003631C5;
 					};
 				};
 			};
@@ -716,10 +719,10 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		F12F491319332EA5003631C5 /* PBXTargetDependency */ = {
+		277F39061E892E59007A5A3D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = F12F48EB19332EA4003631C5 /* XbICalendarExample */;
-			targetProxy = F12F491219332EA5003631C5 /* PBXContainerItemProxy */;
+			target = 277F38E51E890B84007A5A3D /* XbICalendar */;
+			targetProxy = 277F39051E892E59007A5A3D /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -931,7 +934,6 @@
 		F12F492219332EA5003631C5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/XbICalendar.app/XbICalendar";
 				CLANG_ENABLE_MODULES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
@@ -954,7 +956,6 @@
 				SWIFT_OBJC_BRIDGING_HEADER = XbICalendarTests/XbICalendarTestsBridge.h;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 3.0;
-				TEST_HOST = "$(BUNDLE_LOADER)";
 				WRAPPER_EXTENSION = xctest;
 			};
 			name = Debug;
@@ -962,7 +963,6 @@
 		F12F492319332EA5003631C5 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/XbICalendar.app/XbICalendar";
 				CLANG_ENABLE_MODULES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
@@ -980,7 +980,6 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = XbICalendarTests/XbICalendarTestsBridge.h;
 				SWIFT_VERSION = 3.0;
-				TEST_HOST = "$(BUNDLE_LOADER)";
 				WRAPPER_EXTENSION = xctest;
 			};
 			name = Release;
