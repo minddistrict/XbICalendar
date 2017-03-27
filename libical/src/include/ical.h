@@ -4,10 +4,37 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+/*======================================================================
+ FILE: icalversion.h
+ CREATOR: eric 20 March 1999
+ (C) COPYRIGHT 2000, Eric Busboom <eric@softwarestudio.org>
+     http://www.softwarestudio.org
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of either:
+    The LGPL as published by the Free Software Foundation, version
+    2.1, available at: http://www.gnu.org/licenses/lgpl-2.1.html
+ Or:
+    The Mozilla Public License Version 1.0. You may obtain a copy of
+    the License at http://www.mozilla.org/MPL/
+ ======================================================================*/
 #ifndef ICAL_VERSION_H
 #define ICAL_VERSION_H
 #define ICAL_PACKAGE "libical"
-#define ICAL_VERSION "2.0"
+#define ICAL_VERSION "2.99"
+#define ICAL_MAJOR_VERSION (2)
+#define ICAL_MINOR_VERSION (99)
+#define ICAL_PATCH_VERSION (99)
+#define ICAL_MICRO_VERSION ICAL_PATCH_VERSION
+/**
+ * ICAL_CHECK_VERSION:
+ * @param major: major version (e.g. 1 for version 1.2.5)
+ * @param minor: minor version (e.g. 2 for version 1.2.5)
+ * @param micro: micro version (e.g. 5 for version 1.2.5)
+ *
+ * @return TRUE if the version of the LIBICAL header files
+ * is the same as or newer than the passed-in version.
+ */
+#define ICAL_CHECK_VERSION(major,minor,micro)                          ;    (ICAL_MAJOR_VERSION > (major) ||                                   ;    (ICAL_MAJOR_VERSION == (major) && ICAL_MINOR_VERSION > (minor)) || ;    (ICAL_MAJOR_VERSION == (major) && ICAL_MINOR_VERSION == (minor) && ;    ICAL_MICRO_VERSION >= (micro)))
 #endif
 /*======================================================================
  FILE: icaltime.h
@@ -44,9 +71,7 @@ extern "C" {
  *      - icaltime_today()
  *      - icaltime_from_timet_with_zone(time_t tm, int is_date,
  *              icaltimezone *zone)
- *      - icaltime_from_string_with_zone(const char* str, icaltimezone *zone)
  *      - icaltime_from_day_of_year(int doy, int year)
- *      - icaltime_from_week_number(int week_number, int year)
  *
  *      italtimetype objects can be converted to different formats:
  *
@@ -62,7 +87,7 @@ extern "C" {
  *      - icaltime_set_timezone(struct icaltimetype t, const icaltimezone *zone)
  *      - icaltime_day_of_year(struct icaltimetype t)
  *      - icaltime_day_of_week(struct icaltimetype t)
- *      - icaltime_start_doy_of_week(struct icaltimetype t, int fdow)
+ *      - icaltime_start_doy_week(struct icaltimetype t, int fdow)
  *      - icaltime_week_number(struct icaltimetype t)
  *
  *      Query methods include:
@@ -74,7 +99,6 @@ extern "C" {
  *
  *      Modify, compare and utility methods include:
  *
- *      - icaltime_compare_with_zone(struct icaltimetype a,struct icaltimetype b)
  *      - icaltime_compare(struct icaltimetype a,struct icaltimetype b)
  *      - icaltime_compare_date_only(struct icaltimetype a,
  *              struct icaltimetype b)
@@ -102,12 +126,6 @@ struct icaltime_span
     int is_busy;        /**< 1->busy time, 0-> free time */
 };
 typedef struct icaltime_span icaltime_span;
-/*
- *      FIXME
- *
- *      is_utc is redundant, and might be considered a minor optimization.
- *      It might be deprecated, so you should use icaltime_is_utc() instead.
- */
 struct icaltimetype
 {
     int year;           /**< Actual year, e.g. 2001. */
@@ -118,8 +136,8 @@ struct icaltimetype
     int second;
     int is_utc;         /**< 1-> time is in UTC timezone */
     int is_date;        /**< 1 -> interpret this as date. */
-    int is_daylight;     /**< 1 -> time is in daylight savings time. */
-    const icaltimezone *zone;           /**< timezone */
+    int is_daylight;    /**< 1 -> time is in daylight savings time. */
+    const icaltimezone *zone;  /**< timezone */
 };
 typedef struct icaltimetype icaltimetype;
 /** Return a null time, which indicates no time has been set.
@@ -131,24 +149,21 @@ LIBICAL_ICAL_EXPORT struct icaltimetype icaltime_null_date(void);
 LIBICAL_ICAL_EXPORT struct icaltimetype icaltime_current_time_with_zone(const icaltimezone *zone);
 /** Returns the current day as an icaltimetype, with is_date set. */
 LIBICAL_ICAL_EXPORT struct icaltimetype icaltime_today(void);
-/** Convert seconds past UNIX epoch to a timetype*/
-LIBICAL_ICAL_EXPORT struct icaltimetype icaltime_from_timet(const time_t v, const int is_date);
 /** Convert seconds past UNIX epoch to a timetype, using timezones. */
 LIBICAL_ICAL_EXPORT struct icaltimetype icaltime_from_timet_with_zone(const time_t tm,
                                                                       const int is_date,
                                                                       const icaltimezone *zone);
 /** create a time from an ISO format string */
 LIBICAL_ICAL_EXPORT struct icaltimetype icaltime_from_string(const char *str);
-/** create a time from an ISO format string */
-LIBICAL_ICAL_EXPORT struct icaltimetype icaltime_from_string_with_zone(const char *str,
-                                                                       const icaltimezone *zone);
 /** Create a new time, given a day of year and a year. */
 LIBICAL_ICAL_EXPORT struct icaltimetype icaltime_from_day_of_year(const int doy, const int year);
-/**     @brief Contructor (TODO).
- * Create a new time from a weeknumber and a year. */
-LIBICAL_ICAL_EXPORT struct icaltimetype icaltime_from_week_number(const int week_number,
-                                                                  const int year);
-/** Return the time as seconds past the UNIX epoch */
+/**
+ * Returns the time as seconds past the UNIX epoch
+ *
+ * This function probably won't do what you expect.  In particular, you should
+ * only pass an icaltime in UTC, since no conversion is done.  Even in that case,
+ * it's probably better to just use icaltime_as_timet_with_zone().
+ */
 LIBICAL_ICAL_EXPORT time_t icaltime_as_timet(const struct icaltimetype);
 /** Return the time as seconds past the UNIX epoch, using timezones. */
 LIBICAL_ICAL_EXPORT time_t icaltime_as_timet_with_zone(const struct icaltimetype tt,
@@ -167,9 +182,6 @@ LIBICAL_ICAL_EXPORT struct icaltimetype icaltime_set_timezone(struct icaltimetyp
 LIBICAL_ICAL_EXPORT int icaltime_day_of_year(const struct icaltimetype t);
 /** Return the day of the week of the given time. Sunday is 1 */
 LIBICAL_ICAL_EXPORT int icaltime_day_of_week(const struct icaltimetype t);
-/** Return the day of the year for the Sunday of the week that the
-   given time is within. */
-LIBICAL_ICAL_EXPORT int icaltime_start_doy_of_week(const struct icaltimetype t);
 /** Return the day of the year for the first day of the week that the
    given time is within. */
 LIBICAL_ICAL_EXPORT int icaltime_start_doy_week(const struct icaltimetype t, int fdow);
@@ -185,9 +197,6 @@ LIBICAL_ICAL_EXPORT int icaltime_is_valid_time(const struct icaltimetype t);
 LIBICAL_ICAL_EXPORT int icaltime_is_date(const struct icaltimetype t);
 /** @brief Returns true if time is relative to UTC zone */
 LIBICAL_ICAL_EXPORT int icaltime_is_utc(const struct icaltimetype t);
-/** Return -1, 0, or 1 to indicate that a<b, a==b or a>b */
-LIBICAL_ICAL_EXPORT int icaltime_compare_with_zone(const struct icaltimetype a,
-                                                   const struct icaltimetype b);
 /** Return -1, 0, or 1 to indicate that a<b, a==b or a>b */
 LIBICAL_ICAL_EXPORT int icaltime_compare(const struct icaltimetype a, const struct icaltimetype b);
 /** like icaltime_compare, but only use the date parts. */
@@ -241,7 +250,6 @@ LIBICAL_ICAL_EXPORT int icaltime_span_contains(icaltime_span *s, icaltime_span *
 #ifndef ICALDURATION_H
 #define ICALDURATION_H
 #include "libical_ical_export.h"
-
 struct icaldurationtype
 {
     int is_neg;
@@ -283,8 +291,6 @@ LIBICAL_ICAL_EXPORT struct icaldurationtype icaltime_subtract(struct icaltimetyp
 #ifndef ICALPERIOD_H
 #define ICALPERIOD_H
 #include "libical_ical_export.h"
-
-
 struct icalperiodtype
 {
     struct icaltimetype start;
@@ -448,9 +454,6 @@ LIBICAL_ICAL_EXPORT char *icalenum_reqstat_code_r(icalrequeststatus stat);
 #ifndef ICALTYPES_H
 #define ICALTYPES_H
 #include "libical_ical_export.h"
-
-
-
 struct icaldatetimeperiodtype
 {
     struct icaltimetype time;
@@ -507,7 +510,6 @@ struct icaltimezonetype
     /* Array of phases. The end of the array is a phase with tzname == 0 */
     struct icaltimezonephase *phases;
 };
-LIBICAL_ICAL_EXPORT void icaltimezonetype_free(struct icaltimezonetype tzt);
 /* ical_unknown_token_handling :
  *    How should the ICAL library handle components, properties and parameters with
  *    unknown names?
@@ -594,7 +596,7 @@ Or, just make them up:
 @endcode
 2) Create an iterator
 @code
-        icalrecur_iterator* ritr;
+        icalrecur_iterator *ritr;
         ritr = icalrecur_iterator_new(recur,start);
 @endcode
 3) Iterator over the occurrences
@@ -611,8 +613,6 @@ whatever timezone that dtstart is in.
 #ifndef ICALRECUR_H
 #define ICALRECUR_H
 #include "libical_ical_export.h"
-
-
 /*
  * Recurrence enumerations
  */
@@ -736,9 +736,16 @@ LIBICAL_ICAL_EXPORT char *icalrecurrencetype_as_string(struct icalrecurrencetype
 LIBICAL_ICAL_EXPORT char *icalrecurrencetype_as_string_r(struct icalrecurrencetype *recur);
 /** Recurrence iteration routines */
 typedef struct icalrecur_iterator_impl icalrecur_iterator;
-/** Create a new recurrence rule iterator */
+/** Create a new recurrence rule iterator, starting at DTSTART */
 LIBICAL_ICAL_EXPORT icalrecur_iterator *icalrecur_iterator_new(struct icalrecurrencetype rule,
                                                                struct icaltimetype dtstart);
+/** Set the date-time at which the iterator will start,
+ *  where 'start' is a value between DTSTART and UNTIL.
+ *
+ *  NOTE: CAN NOT be used with RRULEs that contain COUNT.
+ */
+LIBICAL_ICAL_EXPORT int icalrecur_iterator_set_start(icalrecur_iterator *impl,
+                                                     struct icaltimetype start);
 /** Get the next occurrence from an iterator */
 LIBICAL_ICAL_EXPORT struct icaltimetype icalrecur_iterator_next(icalrecur_iterator *);
 /** Free the iterator */
@@ -747,8 +754,8 @@ LIBICAL_ICAL_EXPORT void icalrecur_iterator_free(icalrecur_iterator *);
  * Fills array up with at most 'count' time_t values, each
  *  representing an occurrence time in seconds past the POSIX epoch
  */
-LIBICAL_ICAL_EXPORT int icalrecur_expand_recurrence(char *rule, time_t start,
-                                                    int count, time_t * array);
+LIBICAL_ICAL_EXPORT int icalrecur_expand_recurrence(const char *rule, time_t start,
+                                                    int count, time_t *array);
 #endif
 /*======================================================================
  FILE: icalattach.h
@@ -776,26 +783,15 @@ LIBICAL_ICAL_EXPORT void icalattach_unref(icalattach *attach);
 LIBICAL_ICAL_EXPORT int icalattach_get_is_url(icalattach *attach);
 LIBICAL_ICAL_EXPORT const char *icalattach_get_url(icalattach *attach);
 LIBICAL_ICAL_EXPORT unsigned char *icalattach_get_data(icalattach *attach);
-LIBICAL_ICAL_EXPORT struct icalattachtype *icalattachtype_new(void);
-LIBICAL_ICAL_EXPORT void icalattachtype_add_reference(struct icalattachtype *v);
-LIBICAL_ICAL_EXPORT void icalattachtype_free(struct icalattachtype *v);
-LIBICAL_ICAL_EXPORT void icalattachtype_set_url(struct icalattachtype *v, char *url);
-LIBICAL_ICAL_EXPORT char *icalattachtype_get_url(struct icalattachtype *v);
-LIBICAL_ICAL_EXPORT void icalattachtype_set_base64(struct icalattachtype *v,
-                                                   char *base64, int owns);
-LIBICAL_ICAL_EXPORT char *icalattachtype_get_base64(struct icalattachtype *v);
-LIBICAL_ICAL_EXPORT void icalattachtype_set_binary(struct icalattachtype *v,
-                                                   char *binary, int owns);
-LIBICAL_ICAL_EXPORT void *icalattachtype_get_binary(struct icalattachtype *v);
 #endif /* !ICALATTACH_H */
 /*======================================================================
  FILE: icalvalue.h
  CREATOR: eric 20 March 1999
- (C) COPYRIGHT 2000, Eric Busboom, http://www.softwarestudio.org
+ (C) COPYRIGHT 1999, Eric Busboom  <eric@softwarestudio.org>
  This program is free software; you can redistribute it and/or modify
  it under the terms of either:
     The LGPL as published by the Free Software Foundation, version
-    2.1, available at: http://www.fsf.org/copyleft/lesser.html
+    2.1, available at: http://www.gnu.org/licenses/lgpl-2.1.html
  Or:
     The Mozilla Public License Version 1.0. You may obtain a copy of
     the License at http://www.mozilla.org/MPL/
@@ -803,33 +799,40 @@ LIBICAL_ICAL_EXPORT void *icalattachtype_get_binary(struct icalattachtype *v);
 #ifndef ICALDERIVEDVALUE_H
 #define ICALDERIVEDVALUE_H
 #include "libical_ical_export.h"
-
-
-
 typedef struct icalvalue_impl icalvalue;
-LIBICAL_ICAL_EXPORT void icalvalue_set_x(icalvalue* value, const char* v);
-LIBICAL_ICAL_EXPORT icalvalue* icalvalue_new_x(const char* v);
-LIBICAL_ICAL_EXPORT const char* icalvalue_get_x(const icalvalue* value);
-LIBICAL_ICAL_EXPORT icalvalue* icalvalue_new_recur (struct icalrecurrencetype v);
-LIBICAL_ICAL_EXPORT void icalvalue_set_recur(icalvalue* value, struct icalrecurrencetype v);
-LIBICAL_ICAL_EXPORT struct icalrecurrencetype icalvalue_get_recur(const icalvalue* value);
-LIBICAL_ICAL_EXPORT icalvalue* icalvalue_new_trigger (struct icaltriggertype v);
-LIBICAL_ICAL_EXPORT void icalvalue_set_trigger(icalvalue* value, struct icaltriggertype v);
-LIBICAL_ICAL_EXPORT struct icaltriggertype icalvalue_get_trigger(const icalvalue* value);
-LIBICAL_ICAL_EXPORT icalvalue* icalvalue_new_datetime(struct icaltimetype v);
-LIBICAL_ICAL_EXPORT struct icaltimetype icalvalue_get_datetime(const icalvalue* value);
-LIBICAL_ICAL_EXPORT void icalvalue_set_datetime(icalvalue* value, struct icaltimetype v);
-LIBICAL_ICAL_EXPORT icalvalue* icalvalue_new_datetimeperiod (struct icaldatetimeperiodtype v);
-LIBICAL_ICAL_EXPORT void icalvalue_set_datetimeperiod(icalvalue* value,
+LIBICAL_ICAL_EXPORT void icalvalue_set_x(icalvalue *value, const char *v);
+LIBICAL_ICAL_EXPORT icalvalue *icalvalue_new_x(const char *v);
+LIBICAL_ICAL_EXPORT const char *icalvalue_get_x(const icalvalue *value);
+LIBICAL_ICAL_EXPORT icalvalue *icalvalue_new_recur(struct icalrecurrencetype v);
+LIBICAL_ICAL_EXPORT void icalvalue_set_recur(icalvalue *value, struct icalrecurrencetype v);
+LIBICAL_ICAL_EXPORT struct icalrecurrencetype icalvalue_get_recur(const icalvalue *value);
+LIBICAL_ICAL_EXPORT icalvalue *icalvalue_new_trigger(struct icaltriggertype v);
+LIBICAL_ICAL_EXPORT void icalvalue_set_trigger(icalvalue *value, struct icaltriggertype v);
+LIBICAL_ICAL_EXPORT struct icaltriggertype icalvalue_get_trigger(const icalvalue *value);
+LIBICAL_ICAL_EXPORT icalvalue *icalvalue_new_date(struct icaltimetype v);
+LIBICAL_ICAL_EXPORT struct icaltimetype icalvalue_get_date(const icalvalue *value);
+LIBICAL_ICAL_EXPORT void icalvalue_set_date(icalvalue *value, struct icaltimetype v);
+LIBICAL_ICAL_EXPORT icalvalue *icalvalue_new_datetime(struct icaltimetype v);
+LIBICAL_ICAL_EXPORT struct icaltimetype icalvalue_get_datetime(const icalvalue *value);
+LIBICAL_ICAL_EXPORT void icalvalue_set_datetime(icalvalue *value, struct icaltimetype v);
+LIBICAL_ICAL_EXPORT icalvalue *icalvalue_new_datetimedate(struct icaltimetype v);
+LIBICAL_ICAL_EXPORT struct icaltimetype icalvalue_get_datetimedate(const icalvalue *value);
+LIBICAL_ICAL_EXPORT void icalvalue_set_datetimedate(icalvalue *value, struct icaltimetype v);
+LIBICAL_ICAL_EXPORT icalvalue *icalvalue_new_datetimeperiod(struct icaldatetimeperiodtype v);
+LIBICAL_ICAL_EXPORT void icalvalue_set_datetimeperiod(icalvalue *value,
                                                       struct icaldatetimeperiodtype v);
-LIBICAL_ICAL_EXPORT struct icaldatetimeperiodtype icalvalue_get_datetimeperiod(const icalvalue* value);
-LIBICAL_ICAL_EXPORT icalvalue* icalvalue_new_geo(struct icalgeotype v);
-LIBICAL_ICAL_EXPORT struct icalgeotype icalvalue_get_geo(const icalvalue* value);
-LIBICAL_ICAL_EXPORT void icalvalue_set_geo(icalvalue* value, struct icalgeotype v);
-LIBICAL_ICAL_EXPORT icalvalue *icalvalue_new_attach (icalattach *attach);
-LIBICAL_ICAL_EXPORT void icalvalue_set_attach (icalvalue *value, icalattach *attach);
-LIBICAL_ICAL_EXPORT icalattach *icalvalue_get_attach (const icalvalue *value);
-LIBICAL_ICAL_EXPORT void icalvalue_reset_kind(icalvalue* value);
+LIBICAL_ICAL_EXPORT struct icaldatetimeperiodtype icalvalue_get_datetimeperiod(const icalvalue *
+                                                                               value);
+LIBICAL_ICAL_EXPORT icalvalue *icalvalue_new_geo(struct icalgeotype v);
+LIBICAL_ICAL_EXPORT struct icalgeotype icalvalue_get_geo(const icalvalue *value);
+LIBICAL_ICAL_EXPORT void icalvalue_set_geo(icalvalue *value, struct icalgeotype v);
+LIBICAL_ICAL_EXPORT icalvalue *icalvalue_new_attach(icalattach *attach);
+LIBICAL_ICAL_EXPORT void icalvalue_set_attach(icalvalue *value, icalattach *attach);
+LIBICAL_ICAL_EXPORT icalattach *icalvalue_get_attach(const icalvalue *value);
+LIBICAL_ICAL_EXPORT icalvalue *icalvalue_new_binary(const char *v);
+LIBICAL_ICAL_EXPORT void icalvalue_set_binary(icalvalue *value, const char *v);
+LIBICAL_ICAL_EXPORT const char *icalvalue_get_binary(const icalvalue *value);
+LIBICAL_ICAL_EXPORT void icalvalue_reset_kind(icalvalue *value);
 typedef enum icalvalue_kind {
    ICAL_ANY_VALUE=5000,
     ICAL_ACTION_VALUE=5027,
@@ -843,6 +846,7 @@ typedef enum icalvalue_kind {
     ICAL_CMD_VALUE=5010,
     ICAL_DATE_VALUE=5002,
     ICAL_DATETIME_VALUE=5028,
+    ICAL_DATETIMEDATE_VALUE=5036,
     ICAL_DATETIMEPERIOD_VALUE=5015,
     ICAL_DURATION_VALUE=5020,
     ICAL_FLOAT_VALUE=5013,
@@ -1015,122 +1019,114 @@ typedef enum icalproperty_xlicclass {
     ICAL_XLICCLASS_NONE = 11199
 } icalproperty_xlicclass;
 #define ICALPROPERTY_LAST_ENUM 11300
- /* ACTION */ 
-LIBICAL_ICAL_EXPORT icalvalue* icalvalue_new_action(enum icalproperty_action v); 
-LIBICAL_ICAL_EXPORT enum icalproperty_action icalvalue_get_action(const icalvalue* value); 
-LIBICAL_ICAL_EXPORT void icalvalue_set_action(icalvalue* value, enum icalproperty_action v);
- /* BINARY */ 
-LIBICAL_ICAL_EXPORT icalvalue* icalvalue_new_binary(const char* v); 
-LIBICAL_ICAL_EXPORT const char* icalvalue_get_binary(const icalvalue* value); 
-LIBICAL_ICAL_EXPORT void icalvalue_set_binary(icalvalue* value, const char* v);
- /* BOOLEAN */ 
-LIBICAL_ICAL_EXPORT icalvalue* icalvalue_new_boolean(int v); 
-LIBICAL_ICAL_EXPORT int icalvalue_get_boolean(const icalvalue* value); 
-LIBICAL_ICAL_EXPORT void icalvalue_set_boolean(icalvalue* value, int v);
- /* BUSYTYPE */ 
-LIBICAL_ICAL_EXPORT icalvalue* icalvalue_new_busytype(enum icalproperty_busytype v); 
-LIBICAL_ICAL_EXPORT enum icalproperty_busytype icalvalue_get_busytype(const icalvalue* value); 
-LIBICAL_ICAL_EXPORT void icalvalue_set_busytype(icalvalue* value, enum icalproperty_busytype v);
- /* CAL-ADDRESS */ 
-LIBICAL_ICAL_EXPORT icalvalue* icalvalue_new_caladdress(const char* v); 
-LIBICAL_ICAL_EXPORT const char* icalvalue_get_caladdress(const icalvalue* value); 
-LIBICAL_ICAL_EXPORT void icalvalue_set_caladdress(icalvalue* value, const char* v);
- /* CAR-LEVEL */ 
-LIBICAL_ICAL_EXPORT icalvalue* icalvalue_new_carlevel(enum icalproperty_carlevel v); 
-LIBICAL_ICAL_EXPORT enum icalproperty_carlevel icalvalue_get_carlevel(const icalvalue* value); 
-LIBICAL_ICAL_EXPORT void icalvalue_set_carlevel(icalvalue* value, enum icalproperty_carlevel v);
- /* CMD */ 
-LIBICAL_ICAL_EXPORT icalvalue* icalvalue_new_cmd(enum icalproperty_cmd v); 
-LIBICAL_ICAL_EXPORT enum icalproperty_cmd icalvalue_get_cmd(const icalvalue* value); 
-LIBICAL_ICAL_EXPORT void icalvalue_set_cmd(icalvalue* value, enum icalproperty_cmd v);
- /* DATE */ 
-LIBICAL_ICAL_EXPORT icalvalue* icalvalue_new_date(struct icaltimetype v); 
-LIBICAL_ICAL_EXPORT struct icaltimetype icalvalue_get_date(const icalvalue* value); 
-LIBICAL_ICAL_EXPORT void icalvalue_set_date(icalvalue* value, struct icaltimetype v);
- /* DURATION */ 
-LIBICAL_ICAL_EXPORT icalvalue* icalvalue_new_duration(struct icaldurationtype v); 
-LIBICAL_ICAL_EXPORT struct icaldurationtype icalvalue_get_duration(const icalvalue* value); 
-LIBICAL_ICAL_EXPORT void icalvalue_set_duration(icalvalue* value, struct icaldurationtype v);
- /* FLOAT */ 
-LIBICAL_ICAL_EXPORT icalvalue* icalvalue_new_float(float v); 
-LIBICAL_ICAL_EXPORT float icalvalue_get_float(const icalvalue* value); 
-LIBICAL_ICAL_EXPORT void icalvalue_set_float(icalvalue* value, float v);
- /* INTEGER */ 
-LIBICAL_ICAL_EXPORT icalvalue* icalvalue_new_integer(int v); 
-LIBICAL_ICAL_EXPORT int icalvalue_get_integer(const icalvalue* value); 
-LIBICAL_ICAL_EXPORT void icalvalue_set_integer(icalvalue* value, int v);
- /* METHOD */ 
-LIBICAL_ICAL_EXPORT icalvalue* icalvalue_new_method(enum icalproperty_method v); 
-LIBICAL_ICAL_EXPORT enum icalproperty_method icalvalue_get_method(const icalvalue* value); 
-LIBICAL_ICAL_EXPORT void icalvalue_set_method(icalvalue* value, enum icalproperty_method v);
- /* PERIOD */ 
-LIBICAL_ICAL_EXPORT icalvalue* icalvalue_new_period(struct icalperiodtype v); 
-LIBICAL_ICAL_EXPORT struct icalperiodtype icalvalue_get_period(const icalvalue* value); 
-LIBICAL_ICAL_EXPORT void icalvalue_set_period(icalvalue* value, struct icalperiodtype v);
- /* POLLCOMPLETION */ 
-LIBICAL_ICAL_EXPORT icalvalue* icalvalue_new_pollcompletion(enum icalproperty_pollcompletion v); 
-LIBICAL_ICAL_EXPORT enum icalproperty_pollcompletion icalvalue_get_pollcompletion(const icalvalue* value); 
-LIBICAL_ICAL_EXPORT void icalvalue_set_pollcompletion(icalvalue* value, enum icalproperty_pollcompletion v);
- /* POLLMODE */ 
-LIBICAL_ICAL_EXPORT icalvalue* icalvalue_new_pollmode(enum icalproperty_pollmode v); 
-LIBICAL_ICAL_EXPORT enum icalproperty_pollmode icalvalue_get_pollmode(const icalvalue* value); 
-LIBICAL_ICAL_EXPORT void icalvalue_set_pollmode(icalvalue* value, enum icalproperty_pollmode v);
- /* QUERY */ 
-LIBICAL_ICAL_EXPORT icalvalue* icalvalue_new_query(const char* v); 
-LIBICAL_ICAL_EXPORT const char* icalvalue_get_query(const icalvalue* value); 
-LIBICAL_ICAL_EXPORT void icalvalue_set_query(icalvalue* value, const char* v);
- /* QUERY-LEVEL */ 
-LIBICAL_ICAL_EXPORT icalvalue* icalvalue_new_querylevel(enum icalproperty_querylevel v); 
-LIBICAL_ICAL_EXPORT enum icalproperty_querylevel icalvalue_get_querylevel(const icalvalue* value); 
-LIBICAL_ICAL_EXPORT void icalvalue_set_querylevel(icalvalue* value, enum icalproperty_querylevel v);
- /* REQUEST-STATUS */ 
-LIBICAL_ICAL_EXPORT icalvalue* icalvalue_new_requeststatus(struct icalreqstattype v); 
-LIBICAL_ICAL_EXPORT struct icalreqstattype icalvalue_get_requeststatus(const icalvalue* value); 
-LIBICAL_ICAL_EXPORT void icalvalue_set_requeststatus(icalvalue* value, struct icalreqstattype v);
- /* STATUS */ 
-LIBICAL_ICAL_EXPORT icalvalue* icalvalue_new_status(enum icalproperty_status v); 
-LIBICAL_ICAL_EXPORT enum icalproperty_status icalvalue_get_status(const icalvalue* value); 
-LIBICAL_ICAL_EXPORT void icalvalue_set_status(icalvalue* value, enum icalproperty_status v);
- /* STRING */ 
-LIBICAL_ICAL_EXPORT icalvalue* icalvalue_new_string(const char* v); 
-LIBICAL_ICAL_EXPORT const char* icalvalue_get_string(const icalvalue* value); 
-LIBICAL_ICAL_EXPORT void icalvalue_set_string(icalvalue* value, const char* v);
- /* TASKMODE */ 
-LIBICAL_ICAL_EXPORT icalvalue* icalvalue_new_taskmode(enum icalproperty_taskmode v); 
-LIBICAL_ICAL_EXPORT enum icalproperty_taskmode icalvalue_get_taskmode(const icalvalue* value); 
-LIBICAL_ICAL_EXPORT void icalvalue_set_taskmode(icalvalue* value, enum icalproperty_taskmode v);
- /* TEXT */ 
-LIBICAL_ICAL_EXPORT icalvalue* icalvalue_new_text(const char* v); 
-LIBICAL_ICAL_EXPORT const char* icalvalue_get_text(const icalvalue* value); 
-LIBICAL_ICAL_EXPORT void icalvalue_set_text(icalvalue* value, const char* v);
- /* TRANSP */ 
-LIBICAL_ICAL_EXPORT icalvalue* icalvalue_new_transp(enum icalproperty_transp v); 
-LIBICAL_ICAL_EXPORT enum icalproperty_transp icalvalue_get_transp(const icalvalue* value); 
-LIBICAL_ICAL_EXPORT void icalvalue_set_transp(icalvalue* value, enum icalproperty_transp v);
- /* URI */ 
-LIBICAL_ICAL_EXPORT icalvalue* icalvalue_new_uri(const char* v); 
-LIBICAL_ICAL_EXPORT const char* icalvalue_get_uri(const icalvalue* value); 
-LIBICAL_ICAL_EXPORT void icalvalue_set_uri(icalvalue* value, const char* v);
- /* UTC-OFFSET */ 
-LIBICAL_ICAL_EXPORT icalvalue* icalvalue_new_utcoffset(int v); 
-LIBICAL_ICAL_EXPORT int icalvalue_get_utcoffset(const icalvalue* value); 
-LIBICAL_ICAL_EXPORT void icalvalue_set_utcoffset(icalvalue* value, int v);
- /* X-LIC-CLASS */ 
-LIBICAL_ICAL_EXPORT icalvalue* icalvalue_new_xlicclass(enum icalproperty_xlicclass v); 
-LIBICAL_ICAL_EXPORT enum icalproperty_xlicclass icalvalue_get_xlicclass(const icalvalue* value); 
-LIBICAL_ICAL_EXPORT void icalvalue_set_xlicclass(icalvalue* value, enum icalproperty_xlicclass v);
+/* ACTION */
+LIBICAL_ICAL_EXPORT icalvalue *icalvalue_new_action(enum icalproperty_action v);
+LIBICAL_ICAL_EXPORT enum icalproperty_action icalvalue_get_action(const icalvalue *value);
+LIBICAL_ICAL_EXPORT void icalvalue_set_action(icalvalue *value, enum icalproperty_action v);
+/* BOOLEAN */
+LIBICAL_ICAL_EXPORT icalvalue *icalvalue_new_boolean(int v);
+LIBICAL_ICAL_EXPORT int icalvalue_get_boolean(const icalvalue *value);
+LIBICAL_ICAL_EXPORT void icalvalue_set_boolean(icalvalue *value, int v);
+/* BUSYTYPE */
+LIBICAL_ICAL_EXPORT icalvalue *icalvalue_new_busytype(enum icalproperty_busytype v);
+LIBICAL_ICAL_EXPORT enum icalproperty_busytype icalvalue_get_busytype(const icalvalue *value);
+LIBICAL_ICAL_EXPORT void icalvalue_set_busytype(icalvalue *value, enum icalproperty_busytype v);
+/* CAL-ADDRESS */
+LIBICAL_ICAL_EXPORT icalvalue *icalvalue_new_caladdress(const char * v);
+LIBICAL_ICAL_EXPORT const char * icalvalue_get_caladdress(const icalvalue *value);
+LIBICAL_ICAL_EXPORT void icalvalue_set_caladdress(icalvalue *value, const char * v);
+/* CAR-LEVEL */
+LIBICAL_ICAL_EXPORT icalvalue *icalvalue_new_carlevel(enum icalproperty_carlevel v);
+LIBICAL_ICAL_EXPORT enum icalproperty_carlevel icalvalue_get_carlevel(const icalvalue *value);
+LIBICAL_ICAL_EXPORT void icalvalue_set_carlevel(icalvalue *value, enum icalproperty_carlevel v);
+/* CMD */
+LIBICAL_ICAL_EXPORT icalvalue *icalvalue_new_cmd(enum icalproperty_cmd v);
+LIBICAL_ICAL_EXPORT enum icalproperty_cmd icalvalue_get_cmd(const icalvalue *value);
+LIBICAL_ICAL_EXPORT void icalvalue_set_cmd(icalvalue *value, enum icalproperty_cmd v);
+/* DURATION */
+LIBICAL_ICAL_EXPORT icalvalue *icalvalue_new_duration(struct icaldurationtype v);
+LIBICAL_ICAL_EXPORT struct icaldurationtype icalvalue_get_duration(const icalvalue *value);
+LIBICAL_ICAL_EXPORT void icalvalue_set_duration(icalvalue *value, struct icaldurationtype v);
+/* FLOAT */
+LIBICAL_ICAL_EXPORT icalvalue *icalvalue_new_float(float v);
+LIBICAL_ICAL_EXPORT float icalvalue_get_float(const icalvalue *value);
+LIBICAL_ICAL_EXPORT void icalvalue_set_float(icalvalue *value, float v);
+/* INTEGER */
+LIBICAL_ICAL_EXPORT icalvalue *icalvalue_new_integer(int v);
+LIBICAL_ICAL_EXPORT int icalvalue_get_integer(const icalvalue *value);
+LIBICAL_ICAL_EXPORT void icalvalue_set_integer(icalvalue *value, int v);
+/* METHOD */
+LIBICAL_ICAL_EXPORT icalvalue *icalvalue_new_method(enum icalproperty_method v);
+LIBICAL_ICAL_EXPORT enum icalproperty_method icalvalue_get_method(const icalvalue *value);
+LIBICAL_ICAL_EXPORT void icalvalue_set_method(icalvalue *value, enum icalproperty_method v);
+/* PERIOD */
+LIBICAL_ICAL_EXPORT icalvalue *icalvalue_new_period(struct icalperiodtype v);
+LIBICAL_ICAL_EXPORT struct icalperiodtype icalvalue_get_period(const icalvalue *value);
+LIBICAL_ICAL_EXPORT void icalvalue_set_period(icalvalue *value, struct icalperiodtype v);
+/* POLLCOMPLETION */
+LIBICAL_ICAL_EXPORT icalvalue *icalvalue_new_pollcompletion(enum icalproperty_pollcompletion v);
+LIBICAL_ICAL_EXPORT enum icalproperty_pollcompletion icalvalue_get_pollcompletion(const icalvalue *value);
+LIBICAL_ICAL_EXPORT void icalvalue_set_pollcompletion(icalvalue *value, enum icalproperty_pollcompletion v);
+/* POLLMODE */
+LIBICAL_ICAL_EXPORT icalvalue *icalvalue_new_pollmode(enum icalproperty_pollmode v);
+LIBICAL_ICAL_EXPORT enum icalproperty_pollmode icalvalue_get_pollmode(const icalvalue *value);
+LIBICAL_ICAL_EXPORT void icalvalue_set_pollmode(icalvalue *value, enum icalproperty_pollmode v);
+/* QUERY */
+LIBICAL_ICAL_EXPORT icalvalue *icalvalue_new_query(const char * v);
+LIBICAL_ICAL_EXPORT const char * icalvalue_get_query(const icalvalue *value);
+LIBICAL_ICAL_EXPORT void icalvalue_set_query(icalvalue *value, const char * v);
+/* QUERY-LEVEL */
+LIBICAL_ICAL_EXPORT icalvalue *icalvalue_new_querylevel(enum icalproperty_querylevel v);
+LIBICAL_ICAL_EXPORT enum icalproperty_querylevel icalvalue_get_querylevel(const icalvalue *value);
+LIBICAL_ICAL_EXPORT void icalvalue_set_querylevel(icalvalue *value, enum icalproperty_querylevel v);
+/* REQUEST-STATUS */
+LIBICAL_ICAL_EXPORT icalvalue *icalvalue_new_requeststatus(struct icalreqstattype v);
+LIBICAL_ICAL_EXPORT struct icalreqstattype icalvalue_get_requeststatus(const icalvalue *value);
+LIBICAL_ICAL_EXPORT void icalvalue_set_requeststatus(icalvalue *value, struct icalreqstattype v);
+/* STATUS */
+LIBICAL_ICAL_EXPORT icalvalue *icalvalue_new_status(enum icalproperty_status v);
+LIBICAL_ICAL_EXPORT enum icalproperty_status icalvalue_get_status(const icalvalue *value);
+LIBICAL_ICAL_EXPORT void icalvalue_set_status(icalvalue *value, enum icalproperty_status v);
+/* STRING */
+LIBICAL_ICAL_EXPORT icalvalue *icalvalue_new_string(const char * v);
+LIBICAL_ICAL_EXPORT const char * icalvalue_get_string(const icalvalue *value);
+LIBICAL_ICAL_EXPORT void icalvalue_set_string(icalvalue *value, const char * v);
+/* TASKMODE */
+LIBICAL_ICAL_EXPORT icalvalue *icalvalue_new_taskmode(enum icalproperty_taskmode v);
+LIBICAL_ICAL_EXPORT enum icalproperty_taskmode icalvalue_get_taskmode(const icalvalue *value);
+LIBICAL_ICAL_EXPORT void icalvalue_set_taskmode(icalvalue *value, enum icalproperty_taskmode v);
+/* TEXT */
+LIBICAL_ICAL_EXPORT icalvalue *icalvalue_new_text(const char * v);
+LIBICAL_ICAL_EXPORT const char * icalvalue_get_text(const icalvalue *value);
+LIBICAL_ICAL_EXPORT void icalvalue_set_text(icalvalue *value, const char * v);
+/* TRANSP */
+LIBICAL_ICAL_EXPORT icalvalue *icalvalue_new_transp(enum icalproperty_transp v);
+LIBICAL_ICAL_EXPORT enum icalproperty_transp icalvalue_get_transp(const icalvalue *value);
+LIBICAL_ICAL_EXPORT void icalvalue_set_transp(icalvalue *value, enum icalproperty_transp v);
+/* URI */
+LIBICAL_ICAL_EXPORT icalvalue *icalvalue_new_uri(const char * v);
+LIBICAL_ICAL_EXPORT const char * icalvalue_get_uri(const icalvalue *value);
+LIBICAL_ICAL_EXPORT void icalvalue_set_uri(icalvalue *value, const char * v);
+/* UTC-OFFSET */
+LIBICAL_ICAL_EXPORT icalvalue *icalvalue_new_utcoffset(int v);
+LIBICAL_ICAL_EXPORT int icalvalue_get_utcoffset(const icalvalue *value);
+LIBICAL_ICAL_EXPORT void icalvalue_set_utcoffset(icalvalue *value, int v);
+/* X-LIC-CLASS */
+LIBICAL_ICAL_EXPORT icalvalue *icalvalue_new_xlicclass(enum icalproperty_xlicclass v);
+LIBICAL_ICAL_EXPORT enum icalproperty_xlicclass icalvalue_get_xlicclass(const icalvalue *value);
+LIBICAL_ICAL_EXPORT void icalvalue_set_xlicclass(icalvalue *value, enum icalproperty_xlicclass v);
+LIBICAL_ICAL_EXPORT icalvalue *icalvalue_new_class(enum icalproperty_class v);
+LIBICAL_ICAL_EXPORT enum icalproperty_class icalvalue_get_class(const icalvalue *value);
+LIBICAL_ICAL_EXPORT void icalvalue_set_class(icalvalue *value, enum icalproperty_class v);
 #endif /*ICALVALUE_H*/
-LIBICAL_ICAL_EXPORT icalvalue* icalvalue_new_class(enum icalproperty_class v);
-LIBICAL_ICAL_EXPORT enum icalproperty_class icalvalue_get_class(const icalvalue* value);
-LIBICAL_ICAL_EXPORT void icalvalue_set_class(icalvalue* value, enum icalproperty_class v);
 /*======================================================================
  FILE: icalparam.h
  CREATOR: eric 20 March 1999
- (C) COPYRIGHT 2000, Eric Busboom, http://www.softwarestudio.org
+ (C) COPYRIGHT 2000, Eric Busboom <eric@softwarestudio.org>
  This program is free software; you can redistribute it and/or modify
  it under the terms of either:
     The LGPL as published by the Free Software Foundation, version
-    2.1, available at: http://www.fsf.org/copyleft/lesser.html
+    2.1, available at: http://www.gnu.org/licenses/lgpl-2.1.html
  Or:
     The Mozilla Public License Version 1.0. You may obtain a copy of
     the License at http://www.mozilla.org/MPL/
@@ -1140,56 +1136,60 @@ LIBICAL_ICAL_EXPORT void icalvalue_set_class(icalvalue* value, enum icalproperty
 #define ICALDERIVEDPARAMETER_H
 #include "libical_ical_export.h"
 typedef struct icalparameter_impl icalparameter;
-LIBICAL_ICAL_EXPORT const char* icalparameter_enum_to_string(int e);
-LIBICAL_ICAL_EXPORT int icalparameter_string_to_enum(const char* str);
+LIBICAL_ICAL_EXPORT const char *icalparameter_enum_to_string(int e);
+LIBICAL_ICAL_EXPORT int icalparameter_string_to_enum(const char *str);
 /* START of section of machine generated code (mkderivedparameters.pl). Do not edit. */
 typedef enum icalparameter_kind {
     ICAL_ANY_PARAMETER = 0,
-    ICAL_ACTIONPARAM_PARAMETER = 1, 
-    ICAL_ALTREP_PARAMETER = 2, 
-    ICAL_CHARSET_PARAMETER = 3, 
-    ICAL_CN_PARAMETER = 4, 
-    ICAL_CUTYPE_PARAMETER = 5, 
-    ICAL_DELEGATEDFROM_PARAMETER = 6, 
-    ICAL_DELEGATEDTO_PARAMETER = 7, 
-    ICAL_DIR_PARAMETER = 8, 
-    ICAL_ENABLE_PARAMETER = 9, 
-    ICAL_ENCODING_PARAMETER = 10, 
-    ICAL_FBTYPE_PARAMETER = 11, 
-    ICAL_FILENAME_PARAMETER = 42, 
-    ICAL_FMTTYPE_PARAMETER = 12, 
-    ICAL_IANA_PARAMETER = 33, 
-    ICAL_ID_PARAMETER = 13, 
-    ICAL_LANGUAGE_PARAMETER = 14, 
-    ICAL_LATENCY_PARAMETER = 15, 
-    ICAL_LOCAL_PARAMETER = 16, 
-    ICAL_LOCALIZE_PARAMETER = 17, 
-    ICAL_MANAGEDID_PARAMETER = 40, 
-    ICAL_MEMBER_PARAMETER = 18, 
-    ICAL_MODIFIED_PARAMETER = 44, 
-    ICAL_OPTIONS_PARAMETER = 19, 
-    ICAL_PARTSTAT_PARAMETER = 20, 
-    ICAL_PUBLICCOMMENT_PARAMETER = 37, 
-    ICAL_RANGE_PARAMETER = 21, 
-    ICAL_REASON_PARAMETER = 43, 
-    ICAL_RELATED_PARAMETER = 22, 
-    ICAL_RELTYPE_PARAMETER = 23, 
-    ICAL_REQUIRED_PARAMETER = 43, 
-    ICAL_RESPONSE_PARAMETER = 38, 
-    ICAL_ROLE_PARAMETER = 24, 
-    ICAL_RSVP_PARAMETER = 25, 
-    ICAL_SCHEDULEAGENT_PARAMETER = 34, 
-    ICAL_SCHEDULEFORCESEND_PARAMETER = 35, 
-    ICAL_SCHEDULESTATUS_PARAMETER = 36, 
-    ICAL_SENTBY_PARAMETER = 26, 
-    ICAL_SIZE_PARAMETER = 41, 
-    ICAL_STAYINFORMED_PARAMETER = 39, 
-    ICAL_SUBSTATE_PARAMETER = 45, 
-    ICAL_TZID_PARAMETER = 27, 
-    ICAL_VALUE_PARAMETER = 28, 
-    ICAL_X_PARAMETER = 29, 
-    ICAL_XLICCOMPARETYPE_PARAMETER = 30, 
-    ICAL_XLICERRORTYPE_PARAMETER = 31, 
+    ICAL_ACTIONPARAM_PARAMETER = 1,
+    ICAL_ALTREP_PARAMETER = 2,
+    ICAL_CHARSET_PARAMETER = 3,
+    ICAL_CN_PARAMETER = 4,
+    ICAL_CUTYPE_PARAMETER = 5,
+    ICAL_DELEGATEDFROM_PARAMETER = 6,
+    ICAL_DELEGATEDTO_PARAMETER = 7,
+    ICAL_DIR_PARAMETER = 8,
+    ICAL_DISPLAY_PARAMETER = 46,
+    ICAL_EMAIL_PARAMETER = 50,
+    ICAL_ENABLE_PARAMETER = 9,
+    ICAL_ENCODING_PARAMETER = 10,
+    ICAL_FBTYPE_PARAMETER = 11,
+    ICAL_FEATURE_PARAMETER = 48,
+    ICAL_FILENAME_PARAMETER = 42,
+    ICAL_FMTTYPE_PARAMETER = 12,
+    ICAL_IANA_PARAMETER = 33,
+    ICAL_ID_PARAMETER = 13,
+    ICAL_LABEL_PARAMETER = 49,
+    ICAL_LANGUAGE_PARAMETER = 14,
+    ICAL_LATENCY_PARAMETER = 15,
+    ICAL_LOCAL_PARAMETER = 16,
+    ICAL_LOCALIZE_PARAMETER = 17,
+    ICAL_MANAGEDID_PARAMETER = 40,
+    ICAL_MEMBER_PARAMETER = 18,
+    ICAL_MODIFIED_PARAMETER = 44,
+    ICAL_OPTIONS_PARAMETER = 19,
+    ICAL_PARTSTAT_PARAMETER = 20,
+    ICAL_PUBLICCOMMENT_PARAMETER = 37,
+    ICAL_RANGE_PARAMETER = 21,
+    ICAL_REASON_PARAMETER = 43,
+    ICAL_RELATED_PARAMETER = 22,
+    ICAL_RELTYPE_PARAMETER = 23,
+    ICAL_REQUIRED_PARAMETER = 43,
+    ICAL_RESPONSE_PARAMETER = 38,
+    ICAL_ROLE_PARAMETER = 24,
+    ICAL_RSVP_PARAMETER = 25,
+    ICAL_SCHEDULEAGENT_PARAMETER = 34,
+    ICAL_SCHEDULEFORCESEND_PARAMETER = 35,
+    ICAL_SCHEDULESTATUS_PARAMETER = 36,
+    ICAL_SENTBY_PARAMETER = 26,
+    ICAL_SIZE_PARAMETER = 41,
+    ICAL_STAYINFORMED_PARAMETER = 39,
+    ICAL_SUBSTATE_PARAMETER = 45,
+    ICAL_TZID_PARAMETER = 27,
+    ICAL_VALUE_PARAMETER = 28,
+    ICAL_X_PARAMETER = 29,
+    ICAL_XLICCOMPARETYPE_PARAMETER = 30,
+    ICAL_XLICERRORTYPE_PARAMETER = 31,
     ICAL_NO_PARAMETER = 32
 } icalparameter_kind;
 #define ICALPARAMETER_FIRST_ENUM 20000
@@ -1208,6 +1208,14 @@ typedef enum icalparameter_cutype {
     ICAL_CUTYPE_UNKNOWN = 20105,
     ICAL_CUTYPE_NONE = 20199
 } icalparameter_cutype;
+typedef enum icalparameter_display {
+    ICAL_DISPLAY_X = 22000,
+    ICAL_DISPLAY_BADGE = 22001,
+    ICAL_DISPLAY_GRAPHIC = 22002,
+    ICAL_DISPLAY_FULLSIZE = 22003,
+    ICAL_DISPLAY_THUMBNAIL = 22004,
+    ICAL_DISPLAY_NONE = 22099
+} icalparameter_display;
 typedef enum icalparameter_enable {
     ICAL_ENABLE_X = 20200,
     ICAL_ENABLE_TRUE = 20201,
@@ -1228,6 +1236,17 @@ typedef enum icalparameter_fbtype {
     ICAL_FBTYPE_BUSYTENTATIVE = 20404,
     ICAL_FBTYPE_NONE = 20499
 } icalparameter_fbtype;
+typedef enum icalparameter_feature {
+    ICAL_FEATURE_X = 22100,
+    ICAL_FEATURE_AUDIO = 22101,
+    ICAL_FEATURE_CHAT = 22102,
+    ICAL_FEATURE_FEED = 22103,
+    ICAL_FEATURE_MODERATOR = 22104,
+    ICAL_FEATURE_PHONE = 22105,
+    ICAL_FEATURE_SCREEN = 22106,
+    ICAL_FEATURE_VIDEO = 22107,
+    ICAL_FEATURE_NONE = 22199
+} icalparameter_feature;
 typedef enum icalparameter_local {
     ICAL_LOCAL_X = 20500,
     ICAL_LOCAL_TRUE = 20501,
@@ -1355,187 +1374,203 @@ typedef enum icalparameter_xlicerrortype {
     ICAL_XLICERRORTYPE_VCALPROPPARSEERROR = 21809,
     ICAL_XLICERRORTYPE_NONE = 21899
 } icalparameter_xlicerrortype;
-#define ICALPARAMETER_LAST_ENUM 22000
+#define ICALPARAMETER_LAST_ENUM 22200
 /* ACTIONPARAM */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_actionparam(icalparameter_action v);
-LIBICAL_ICAL_EXPORT icalparameter_action icalparameter_get_actionparam(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_actionparam(icalparameter* value, icalparameter_action v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_actionparam(icalparameter_action v);
+LIBICAL_ICAL_EXPORT icalparameter_action icalparameter_get_actionparam(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_actionparam(icalparameter *value, icalparameter_action v);
 /* ALTREP */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_altrep(const char* v);
-LIBICAL_ICAL_EXPORT const char* icalparameter_get_altrep(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_altrep(icalparameter* value, const char* v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_altrep(const char * v);
+LIBICAL_ICAL_EXPORT const char * icalparameter_get_altrep(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_altrep(icalparameter *value, const char * v);
 /* CHARSET */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_charset(const char* v);
-LIBICAL_ICAL_EXPORT const char* icalparameter_get_charset(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_charset(icalparameter* value, const char* v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_charset(const char * v);
+LIBICAL_ICAL_EXPORT const char * icalparameter_get_charset(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_charset(icalparameter *value, const char * v);
 /* CN */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_cn(const char* v);
-LIBICAL_ICAL_EXPORT const char* icalparameter_get_cn(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_cn(icalparameter* value, const char* v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_cn(const char * v);
+LIBICAL_ICAL_EXPORT const char * icalparameter_get_cn(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_cn(icalparameter *value, const char * v);
 /* CUTYPE */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_cutype(icalparameter_cutype v);
-LIBICAL_ICAL_EXPORT icalparameter_cutype icalparameter_get_cutype(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_cutype(icalparameter* value, icalparameter_cutype v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_cutype(icalparameter_cutype v);
+LIBICAL_ICAL_EXPORT icalparameter_cutype icalparameter_get_cutype(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_cutype(icalparameter *value, icalparameter_cutype v);
 /* DELEGATED-FROM */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_delegatedfrom(const char* v);
-LIBICAL_ICAL_EXPORT const char* icalparameter_get_delegatedfrom(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_delegatedfrom(icalparameter* value, const char* v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_delegatedfrom(const char * v);
+LIBICAL_ICAL_EXPORT const char * icalparameter_get_delegatedfrom(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_delegatedfrom(icalparameter *value, const char * v);
 /* DELEGATED-TO */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_delegatedto(const char* v);
-LIBICAL_ICAL_EXPORT const char* icalparameter_get_delegatedto(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_delegatedto(icalparameter* value, const char* v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_delegatedto(const char * v);
+LIBICAL_ICAL_EXPORT const char * icalparameter_get_delegatedto(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_delegatedto(icalparameter *value, const char * v);
 /* DIR */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_dir(const char* v);
-LIBICAL_ICAL_EXPORT const char* icalparameter_get_dir(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_dir(icalparameter* value, const char* v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_dir(const char * v);
+LIBICAL_ICAL_EXPORT const char * icalparameter_get_dir(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_dir(icalparameter *value, const char * v);
+/* DISPLAY */
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_display(icalparameter_display v);
+LIBICAL_ICAL_EXPORT icalparameter_display icalparameter_get_display(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_display(icalparameter *value, icalparameter_display v);
+/* EMAIL */
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_email(const char * v);
+LIBICAL_ICAL_EXPORT const char * icalparameter_get_email(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_email(icalparameter *value, const char * v);
 /* ENABLE */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_enable(icalparameter_enable v);
-LIBICAL_ICAL_EXPORT icalparameter_enable icalparameter_get_enable(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_enable(icalparameter* value, icalparameter_enable v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_enable(icalparameter_enable v);
+LIBICAL_ICAL_EXPORT icalparameter_enable icalparameter_get_enable(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_enable(icalparameter *value, icalparameter_enable v);
 /* ENCODING */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_encoding(icalparameter_encoding v);
-LIBICAL_ICAL_EXPORT icalparameter_encoding icalparameter_get_encoding(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_encoding(icalparameter* value, icalparameter_encoding v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_encoding(icalparameter_encoding v);
+LIBICAL_ICAL_EXPORT icalparameter_encoding icalparameter_get_encoding(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_encoding(icalparameter *value, icalparameter_encoding v);
 /* FBTYPE */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_fbtype(icalparameter_fbtype v);
-LIBICAL_ICAL_EXPORT icalparameter_fbtype icalparameter_get_fbtype(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_fbtype(icalparameter* value, icalparameter_fbtype v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_fbtype(icalparameter_fbtype v);
+LIBICAL_ICAL_EXPORT icalparameter_fbtype icalparameter_get_fbtype(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_fbtype(icalparameter *value, icalparameter_fbtype v);
+/* FEATURE */
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_feature(icalparameter_feature v);
+LIBICAL_ICAL_EXPORT icalparameter_feature icalparameter_get_feature(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_feature(icalparameter *value, icalparameter_feature v);
 /* FILENAME */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_filename(const char* v);
-LIBICAL_ICAL_EXPORT const char* icalparameter_get_filename(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_filename(icalparameter* value, const char* v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_filename(const char * v);
+LIBICAL_ICAL_EXPORT const char * icalparameter_get_filename(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_filename(icalparameter *value, const char * v);
 /* FMTTYPE */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_fmttype(const char* v);
-LIBICAL_ICAL_EXPORT const char* icalparameter_get_fmttype(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_fmttype(icalparameter* value, const char* v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_fmttype(const char * v);
+LIBICAL_ICAL_EXPORT const char * icalparameter_get_fmttype(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_fmttype(icalparameter *value, const char * v);
 /* IANA */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_iana(const char* v);
-LIBICAL_ICAL_EXPORT const char* icalparameter_get_iana(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_iana(icalparameter* value, const char* v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_iana(const char * v);
+LIBICAL_ICAL_EXPORT const char * icalparameter_get_iana(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_iana(icalparameter *value, const char * v);
 /* ID */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_id(const char* v);
-LIBICAL_ICAL_EXPORT const char* icalparameter_get_id(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_id(icalparameter* value, const char* v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_id(const char * v);
+LIBICAL_ICAL_EXPORT const char * icalparameter_get_id(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_id(icalparameter *value, const char * v);
+/* LABEL */
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_label(const char * v);
+LIBICAL_ICAL_EXPORT const char * icalparameter_get_label(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_label(icalparameter *value, const char * v);
 /* LANGUAGE */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_language(const char* v);
-LIBICAL_ICAL_EXPORT const char* icalparameter_get_language(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_language(icalparameter* value, const char* v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_language(const char * v);
+LIBICAL_ICAL_EXPORT const char * icalparameter_get_language(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_language(icalparameter *value, const char * v);
 /* LATENCY */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_latency(const char* v);
-LIBICAL_ICAL_EXPORT const char* icalparameter_get_latency(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_latency(icalparameter* value, const char* v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_latency(const char * v);
+LIBICAL_ICAL_EXPORT const char * icalparameter_get_latency(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_latency(icalparameter *value, const char * v);
 /* LOCAL */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_local(icalparameter_local v);
-LIBICAL_ICAL_EXPORT icalparameter_local icalparameter_get_local(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_local(icalparameter* value, icalparameter_local v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_local(icalparameter_local v);
+LIBICAL_ICAL_EXPORT icalparameter_local icalparameter_get_local(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_local(icalparameter *value, icalparameter_local v);
 /* LOCALIZE */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_localize(const char* v);
-LIBICAL_ICAL_EXPORT const char* icalparameter_get_localize(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_localize(icalparameter* value, const char* v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_localize(const char * v);
+LIBICAL_ICAL_EXPORT const char * icalparameter_get_localize(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_localize(icalparameter *value, const char * v);
 /* MANAGED-ID */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_managedid(const char* v);
-LIBICAL_ICAL_EXPORT const char* icalparameter_get_managedid(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_managedid(icalparameter* value, const char* v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_managedid(const char * v);
+LIBICAL_ICAL_EXPORT const char * icalparameter_get_managedid(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_managedid(icalparameter *value, const char * v);
 /* MEMBER */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_member(const char* v);
-LIBICAL_ICAL_EXPORT const char* icalparameter_get_member(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_member(icalparameter* value, const char* v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_member(const char * v);
+LIBICAL_ICAL_EXPORT const char * icalparameter_get_member(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_member(icalparameter *value, const char * v);
 /* MODIFIED */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_modified(const char* v);
-LIBICAL_ICAL_EXPORT const char* icalparameter_get_modified(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_modified(icalparameter* value, const char* v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_modified(const char * v);
+LIBICAL_ICAL_EXPORT const char * icalparameter_get_modified(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_modified(icalparameter *value, const char * v);
 /* OPTIONS */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_options(const char* v);
-LIBICAL_ICAL_EXPORT const char* icalparameter_get_options(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_options(icalparameter* value, const char* v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_options(const char * v);
+LIBICAL_ICAL_EXPORT const char * icalparameter_get_options(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_options(icalparameter *value, const char * v);
 /* PARTSTAT */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_partstat(icalparameter_partstat v);
-LIBICAL_ICAL_EXPORT icalparameter_partstat icalparameter_get_partstat(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_partstat(icalparameter* value, icalparameter_partstat v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_partstat(icalparameter_partstat v);
+LIBICAL_ICAL_EXPORT icalparameter_partstat icalparameter_get_partstat(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_partstat(icalparameter *value, icalparameter_partstat v);
 /* PUBLIC-COMMENT */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_publiccomment(const char* v);
-LIBICAL_ICAL_EXPORT const char* icalparameter_get_publiccomment(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_publiccomment(icalparameter* value, const char* v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_publiccomment(const char * v);
+LIBICAL_ICAL_EXPORT const char * icalparameter_get_publiccomment(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_publiccomment(icalparameter *value, const char * v);
 /* RANGE */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_range(icalparameter_range v);
-LIBICAL_ICAL_EXPORT icalparameter_range icalparameter_get_range(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_range(icalparameter* value, icalparameter_range v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_range(icalparameter_range v);
+LIBICAL_ICAL_EXPORT icalparameter_range icalparameter_get_range(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_range(icalparameter *value, icalparameter_range v);
 /* REASON */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_reason(const char* v);
-LIBICAL_ICAL_EXPORT const char* icalparameter_get_reason(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_reason(icalparameter* value, const char* v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_reason(const char * v);
+LIBICAL_ICAL_EXPORT const char * icalparameter_get_reason(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_reason(icalparameter *value, const char * v);
 /* RELATED */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_related(icalparameter_related v);
-LIBICAL_ICAL_EXPORT icalparameter_related icalparameter_get_related(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_related(icalparameter* value, icalparameter_related v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_related(icalparameter_related v);
+LIBICAL_ICAL_EXPORT icalparameter_related icalparameter_get_related(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_related(icalparameter *value, icalparameter_related v);
 /* RELTYPE */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_reltype(icalparameter_reltype v);
-LIBICAL_ICAL_EXPORT icalparameter_reltype icalparameter_get_reltype(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_reltype(icalparameter* value, icalparameter_reltype v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_reltype(icalparameter_reltype v);
+LIBICAL_ICAL_EXPORT icalparameter_reltype icalparameter_get_reltype(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_reltype(icalparameter *value, icalparameter_reltype v);
 /* REQUIRED */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_required(icalparameter_required v);
-LIBICAL_ICAL_EXPORT icalparameter_required icalparameter_get_required(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_required(icalparameter* value, icalparameter_required v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_required(icalparameter_required v);
+LIBICAL_ICAL_EXPORT icalparameter_required icalparameter_get_required(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_required(icalparameter *value, icalparameter_required v);
 /* RESPONSE */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_response(int v);
-LIBICAL_ICAL_EXPORT int icalparameter_get_response(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_response(icalparameter* value, int v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_response(int v);
+LIBICAL_ICAL_EXPORT int icalparameter_get_response(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_response(icalparameter *value, int v);
 /* ROLE */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_role(icalparameter_role v);
-LIBICAL_ICAL_EXPORT icalparameter_role icalparameter_get_role(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_role(icalparameter* value, icalparameter_role v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_role(icalparameter_role v);
+LIBICAL_ICAL_EXPORT icalparameter_role icalparameter_get_role(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_role(icalparameter *value, icalparameter_role v);
 /* RSVP */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_rsvp(icalparameter_rsvp v);
-LIBICAL_ICAL_EXPORT icalparameter_rsvp icalparameter_get_rsvp(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_rsvp(icalparameter* value, icalparameter_rsvp v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_rsvp(icalparameter_rsvp v);
+LIBICAL_ICAL_EXPORT icalparameter_rsvp icalparameter_get_rsvp(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_rsvp(icalparameter *value, icalparameter_rsvp v);
 /* SCHEDULE-AGENT */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_scheduleagent(icalparameter_scheduleagent v);
-LIBICAL_ICAL_EXPORT icalparameter_scheduleagent icalparameter_get_scheduleagent(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_scheduleagent(icalparameter* value, icalparameter_scheduleagent v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_scheduleagent(icalparameter_scheduleagent v);
+LIBICAL_ICAL_EXPORT icalparameter_scheduleagent icalparameter_get_scheduleagent(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_scheduleagent(icalparameter *value, icalparameter_scheduleagent v);
 /* SCHEDULE-FORCE-SEND */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_scheduleforcesend(icalparameter_scheduleforcesend v);
-LIBICAL_ICAL_EXPORT icalparameter_scheduleforcesend icalparameter_get_scheduleforcesend(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_scheduleforcesend(icalparameter* value, icalparameter_scheduleforcesend v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_scheduleforcesend(icalparameter_scheduleforcesend v);
+LIBICAL_ICAL_EXPORT icalparameter_scheduleforcesend icalparameter_get_scheduleforcesend(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_scheduleforcesend(icalparameter *value, icalparameter_scheduleforcesend v);
 /* SCHEDULE-STATUS */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_schedulestatus(const char* v);
-LIBICAL_ICAL_EXPORT const char* icalparameter_get_schedulestatus(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_schedulestatus(icalparameter* value, const char* v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_schedulestatus(const char * v);
+LIBICAL_ICAL_EXPORT const char * icalparameter_get_schedulestatus(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_schedulestatus(icalparameter *value, const char * v);
 /* SENT-BY */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_sentby(const char* v);
-LIBICAL_ICAL_EXPORT const char* icalparameter_get_sentby(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_sentby(icalparameter* value, const char* v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_sentby(const char * v);
+LIBICAL_ICAL_EXPORT const char * icalparameter_get_sentby(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_sentby(icalparameter *value, const char * v);
 /* SIZE */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_size(const char* v);
-LIBICAL_ICAL_EXPORT const char* icalparameter_get_size(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_size(icalparameter* value, const char* v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_size(const char * v);
+LIBICAL_ICAL_EXPORT const char * icalparameter_get_size(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_size(icalparameter *value, const char * v);
 /* STAY-INFORMED */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_stayinformed(icalparameter_stayinformed v);
-LIBICAL_ICAL_EXPORT icalparameter_stayinformed icalparameter_get_stayinformed(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_stayinformed(icalparameter* value, icalparameter_stayinformed v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_stayinformed(icalparameter_stayinformed v);
+LIBICAL_ICAL_EXPORT icalparameter_stayinformed icalparameter_get_stayinformed(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_stayinformed(icalparameter *value, icalparameter_stayinformed v);
 /* SUBSTATE */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_substate(icalparameter_substate v);
-LIBICAL_ICAL_EXPORT icalparameter_substate icalparameter_get_substate(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_substate(icalparameter* value, icalparameter_substate v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_substate(icalparameter_substate v);
+LIBICAL_ICAL_EXPORT icalparameter_substate icalparameter_get_substate(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_substate(icalparameter *value, icalparameter_substate v);
 /* TZID */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_tzid(const char* v);
-LIBICAL_ICAL_EXPORT const char* icalparameter_get_tzid(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_tzid(icalparameter* value, const char* v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_tzid(const char * v);
+LIBICAL_ICAL_EXPORT const char * icalparameter_get_tzid(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_tzid(icalparameter *value, const char * v);
 /* VALUE */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_value(icalparameter_value v);
-LIBICAL_ICAL_EXPORT icalparameter_value icalparameter_get_value(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_value(icalparameter* value, icalparameter_value v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_value(icalparameter_value v);
+LIBICAL_ICAL_EXPORT icalparameter_value icalparameter_get_value(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_value(icalparameter *value, icalparameter_value v);
 /* X */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_x(const char* v);
-LIBICAL_ICAL_EXPORT const char* icalparameter_get_x(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_x(icalparameter* value, const char* v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_x(const char * v);
+LIBICAL_ICAL_EXPORT const char * icalparameter_get_x(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_x(icalparameter *value, const char * v);
 /* X-LIC-COMPARETYPE */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_xliccomparetype(icalparameter_xliccomparetype v);
-LIBICAL_ICAL_EXPORT icalparameter_xliccomparetype icalparameter_get_xliccomparetype(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_xliccomparetype(icalparameter* value, icalparameter_xliccomparetype v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_xliccomparetype(icalparameter_xliccomparetype v);
+LIBICAL_ICAL_EXPORT icalparameter_xliccomparetype icalparameter_get_xliccomparetype(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_xliccomparetype(icalparameter *value, icalparameter_xliccomparetype v);
 /* X-LIC-ERRORTYPE */
-LIBICAL_ICAL_EXPORT icalparameter* icalparameter_new_xlicerrortype(icalparameter_xlicerrortype v);
-LIBICAL_ICAL_EXPORT icalparameter_xlicerrortype icalparameter_get_xlicerrortype(const icalparameter* value);
-LIBICAL_ICAL_EXPORT void icalparameter_set_xlicerrortype(icalparameter* value, icalparameter_xlicerrortype v);
+LIBICAL_ICAL_EXPORT icalparameter * icalparameter_new_xlicerrortype(icalparameter_xlicerrortype v);
+LIBICAL_ICAL_EXPORT icalparameter_xlicerrortype icalparameter_get_xlicerrortype(const icalparameter *value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_xlicerrortype(icalparameter *value, icalparameter_xlicerrortype v);
 #endif /*ICALPARAMETER_H*/
 /* END   of section of machine generated code (mkderivedparameters.pl). Do not edit. */
 /*======================================================================
@@ -1554,7 +1589,8 @@ LIBICAL_ICAL_EXPORT void icalparameter_set_xlicerrortype(icalparameter* value, i
 #ifndef ICALVALUE_H
 #define ICALVALUE_H
 #include "libical_ical_export.h"
-
+#define ICAL_BOOLEAN_TRUE  1
+#define ICAL_BOOLEAN_FALSE 0
 LIBICAL_ICAL_EXPORT icalvalue *icalvalue_new(icalvalue_kind kind);
 LIBICAL_ICAL_EXPORT icalvalue *icalvalue_new_clone(const icalvalue *value);
 LIBICAL_ICAL_EXPORT icalvalue *icalvalue_new_from_string(icalvalue_kind kind, const char *str);
@@ -1609,7 +1645,6 @@ extern void print_datetime_to_string(char *str, const struct icaltimetype *data)
 #ifndef ICALPARAMETER_H
 #define ICALPARAMETER_H
 #include "libical_ical_export.h"
-
 /* Declared in icalderivedparameter.h */
 /*typedef struct icalparameter_impl icalparameter;*/
 LIBICAL_ICAL_EXPORT icalparameter *icalparameter_new(icalparameter_kind kind);
@@ -1622,7 +1657,6 @@ LIBICAL_ICAL_EXPORT icalparameter *icalparameter_new_from_value_string(icalparam
 LIBICAL_ICAL_EXPORT void icalparameter_free(icalparameter *parameter);
 LIBICAL_ICAL_EXPORT char *icalparameter_as_ical_string(icalparameter *parameter);
 LIBICAL_ICAL_EXPORT char *icalparameter_as_ical_string_r(icalparameter *parameter);
-LIBICAL_ICAL_EXPORT int icalparameter_is_valid(icalparameter *parameter);
 LIBICAL_ICAL_EXPORT icalparameter_kind icalparameter_isa(icalparameter *parameter);
 LIBICAL_ICAL_EXPORT int icalparameter_isa_parameter(void *param);
 /* Access the name of an X parameter */
@@ -1641,710 +1675,734 @@ LIBICAL_ICAL_EXPORT int icalparameter_has_same_name(icalparameter *param1, icalp
 LIBICAL_ICAL_EXPORT const char *icalparameter_kind_to_string(icalparameter_kind kind);
 LIBICAL_ICAL_EXPORT icalparameter_kind icalparameter_string_to_kind(const char *string);
 #endif
-/* -*- Mode: C -*-
-  ======================================================================
-  FILE: icalderivedproperties.{c,h}
-  CREATOR: eric 09 May 1999
-  
-  $Id: icalderivedproperty.h.in,v 1.7 2007-04-30 13:57:48 artcancro Exp $
+/*======================================================================
+ FILE: icalderivedproperty.h
+ CREATOR: eric 09 May 1999
+ (C) COPYRIGHT 1999, Eric Busboom <eric@softwarestudio.org>
  This program is free software; you can redistribute it and/or modify
  it under the terms of either:
     The LGPL as published by the Free Software Foundation, version
-    2.1, available at: http://www.fsf.org/copyleft/lesser.html
+    2.1, available at: http://www.gnu.org/licenses/lgpl-2.1.html
   Or:
     The Mozilla Public License Version 1.0. You may obtain a copy of
     the License at http://www.mozilla.org/MPL/
- (C) COPYRIGHT 2000, Eric Busboom, http://www.softwarestudio.org
  ======================================================================*/
 #ifndef ICALDERIVEDPROPERTY_H
 #define ICALDERIVEDPROPERTY_H
 #include <time.h>
-
-  
-
 typedef struct icalproperty_impl icalproperty;
 typedef enum icalproperty_kind {
     ICAL_ANY_PROPERTY = 0,
-    ICAL_ACCEPTRESPONSE_PROPERTY = 102, 
-    ICAL_ACKNOWLEDGED_PROPERTY = 1, 
-    ICAL_ACTION_PROPERTY = 2, 
-    ICAL_ALLOWCONFLICT_PROPERTY = 3, 
-    ICAL_ATTACH_PROPERTY = 4, 
-    ICAL_ATTENDEE_PROPERTY = 5, 
-    ICAL_BUSYTYPE_PROPERTY = 101, 
-    ICAL_CALID_PROPERTY = 6, 
-    ICAL_CALMASTER_PROPERTY = 7, 
-    ICAL_CALSCALE_PROPERTY = 8, 
-    ICAL_CAPVERSION_PROPERTY = 9, 
-    ICAL_CARLEVEL_PROPERTY = 10, 
-    ICAL_CARID_PROPERTY = 11, 
-    ICAL_CATEGORIES_PROPERTY = 12, 
-    ICAL_CLASS_PROPERTY = 13, 
-    ICAL_CMD_PROPERTY = 14, 
-    ICAL_COMMENT_PROPERTY = 15, 
-    ICAL_COMPLETED_PROPERTY = 16, 
-    ICAL_COMPONENTS_PROPERTY = 17, 
-    ICAL_CONTACT_PROPERTY = 18, 
-    ICAL_CREATED_PROPERTY = 19, 
-    ICAL_CSID_PROPERTY = 20, 
-    ICAL_DATEMAX_PROPERTY = 21, 
-    ICAL_DATEMIN_PROPERTY = 22, 
-    ICAL_DECREED_PROPERTY = 23, 
-    ICAL_DEFAULTCHARSET_PROPERTY = 24, 
-    ICAL_DEFAULTLOCALE_PROPERTY = 25, 
-    ICAL_DEFAULTTZID_PROPERTY = 26, 
-    ICAL_DEFAULTVCARS_PROPERTY = 27, 
-    ICAL_DENY_PROPERTY = 28, 
-    ICAL_DESCRIPTION_PROPERTY = 29, 
-    ICAL_DTEND_PROPERTY = 30, 
-    ICAL_DTSTAMP_PROPERTY = 31, 
-    ICAL_DTSTART_PROPERTY = 32, 
-    ICAL_DUE_PROPERTY = 33, 
-    ICAL_DURATION_PROPERTY = 34, 
-    ICAL_ESTIMATEDDURATION_PROPERTY = 113, 
-    ICAL_EXDATE_PROPERTY = 35, 
-    ICAL_EXPAND_PROPERTY = 36, 
-    ICAL_EXRULE_PROPERTY = 37, 
-    ICAL_FREEBUSY_PROPERTY = 38, 
-    ICAL_GEO_PROPERTY = 39, 
-    ICAL_GRANT_PROPERTY = 40, 
-    ICAL_ITIPVERSION_PROPERTY = 41, 
-    ICAL_LASTMODIFIED_PROPERTY = 42, 
-    ICAL_LOCATION_PROPERTY = 43, 
-    ICAL_MAXCOMPONENTSIZE_PROPERTY = 44, 
-    ICAL_MAXDATE_PROPERTY = 45, 
-    ICAL_MAXRESULTS_PROPERTY = 46, 
-    ICAL_MAXRESULTSSIZE_PROPERTY = 47, 
-    ICAL_METHOD_PROPERTY = 48, 
-    ICAL_MINDATE_PROPERTY = 49, 
-    ICAL_MULTIPART_PROPERTY = 50, 
-    ICAL_NAME_PROPERTY = 51, 
-    ICAL_ORGANIZER_PROPERTY = 52, 
-    ICAL_OWNER_PROPERTY = 53, 
-    ICAL_PERCENTCOMPLETE_PROPERTY = 54, 
-    ICAL_PERMISSION_PROPERTY = 55, 
-    ICAL_POLLCOMPLETION_PROPERTY = 110, 
-    ICAL_POLLITEMID_PROPERTY = 103, 
-    ICAL_POLLMODE_PROPERTY = 104, 
-    ICAL_POLLPROPERTIES_PROPERTY = 105, 
-    ICAL_POLLWINNER_PROPERTY = 106, 
-    ICAL_PRIORITY_PROPERTY = 56, 
-    ICAL_PRODID_PROPERTY = 57, 
-    ICAL_QUERY_PROPERTY = 58, 
-    ICAL_QUERYLEVEL_PROPERTY = 59, 
-    ICAL_QUERYID_PROPERTY = 60, 
-    ICAL_QUERYNAME_PROPERTY = 61, 
-    ICAL_RDATE_PROPERTY = 62, 
-    ICAL_RECURACCEPTED_PROPERTY = 63, 
-    ICAL_RECUREXPAND_PROPERTY = 64, 
-    ICAL_RECURLIMIT_PROPERTY = 65, 
-    ICAL_RECURRENCEID_PROPERTY = 66, 
-    ICAL_RELATEDTO_PROPERTY = 67, 
-    ICAL_RELCALID_PROPERTY = 68, 
-    ICAL_REPEAT_PROPERTY = 69, 
-    ICAL_REPLYURL_PROPERTY = 111, 
-    ICAL_REQUESTSTATUS_PROPERTY = 70, 
-    ICAL_RESOURCES_PROPERTY = 71, 
-    ICAL_RESPONSE_PROPERTY = 112, 
-    ICAL_RESTRICTION_PROPERTY = 72, 
-    ICAL_RRULE_PROPERTY = 73, 
-    ICAL_SCOPE_PROPERTY = 74, 
-    ICAL_SEQUENCE_PROPERTY = 75, 
-    ICAL_STATUS_PROPERTY = 76, 
-    ICAL_STORESEXPANDED_PROPERTY = 77, 
-    ICAL_SUMMARY_PROPERTY = 78, 
-    ICAL_TARGET_PROPERTY = 79, 
-    ICAL_TASKMODE_PROPERTY = 114, 
-    ICAL_TRANSP_PROPERTY = 80, 
-    ICAL_TRIGGER_PROPERTY = 81, 
-    ICAL_TZID_PROPERTY = 82, 
-    ICAL_TZIDALIASOF_PROPERTY = 108, 
-    ICAL_TZNAME_PROPERTY = 83, 
-    ICAL_TZOFFSETFROM_PROPERTY = 84, 
-    ICAL_TZOFFSETTO_PROPERTY = 85, 
-    ICAL_TZUNTIL_PROPERTY = 109, 
-    ICAL_TZURL_PROPERTY = 86, 
-    ICAL_UID_PROPERTY = 87, 
-    ICAL_URL_PROPERTY = 88, 
-    ICAL_VERSION_PROPERTY = 89, 
-    ICAL_VOTER_PROPERTY = 107, 
-    ICAL_X_PROPERTY = 90, 
-    ICAL_XLICCLASS_PROPERTY = 91, 
-    ICAL_XLICCLUSTERCOUNT_PROPERTY = 92, 
-    ICAL_XLICERROR_PROPERTY = 93, 
-    ICAL_XLICMIMECHARSET_PROPERTY = 94, 
-    ICAL_XLICMIMECID_PROPERTY = 95, 
-    ICAL_XLICMIMECONTENTTYPE_PROPERTY = 96, 
-    ICAL_XLICMIMEENCODING_PROPERTY = 97, 
-    ICAL_XLICMIMEFILENAME_PROPERTY = 98, 
-    ICAL_XLICMIMEOPTINFO_PROPERTY = 99, 
+    ICAL_ACCEPTRESPONSE_PROPERTY = 102,
+    ICAL_ACKNOWLEDGED_PROPERTY = 1,
+    ICAL_ACTION_PROPERTY = 2,
+    ICAL_ALLOWCONFLICT_PROPERTY = 3,
+    ICAL_ATTACH_PROPERTY = 4,
+    ICAL_ATTENDEE_PROPERTY = 5,
+    ICAL_BUSYTYPE_PROPERTY = 101,
+    ICAL_CALID_PROPERTY = 6,
+    ICAL_CALMASTER_PROPERTY = 7,
+    ICAL_CALSCALE_PROPERTY = 8,
+    ICAL_CAPVERSION_PROPERTY = 9,
+    ICAL_CARLEVEL_PROPERTY = 10,
+    ICAL_CARID_PROPERTY = 11,
+    ICAL_CATEGORIES_PROPERTY = 12,
+    ICAL_CLASS_PROPERTY = 13,
+    ICAL_CMD_PROPERTY = 14,
+    ICAL_COLOR_PROPERTY = 118,
+    ICAL_COMMENT_PROPERTY = 15,
+    ICAL_COMPLETED_PROPERTY = 16,
+    ICAL_COMPONENTS_PROPERTY = 17,
+    ICAL_CONFERENCE_PROPERTY = 120,
+    ICAL_CONTACT_PROPERTY = 18,
+    ICAL_CREATED_PROPERTY = 19,
+    ICAL_CSID_PROPERTY = 20,
+    ICAL_DATEMAX_PROPERTY = 21,
+    ICAL_DATEMIN_PROPERTY = 22,
+    ICAL_DECREED_PROPERTY = 23,
+    ICAL_DEFAULTCHARSET_PROPERTY = 24,
+    ICAL_DEFAULTLOCALE_PROPERTY = 25,
+    ICAL_DEFAULTTZID_PROPERTY = 26,
+    ICAL_DEFAULTVCARS_PROPERTY = 27,
+    ICAL_DENY_PROPERTY = 28,
+    ICAL_DESCRIPTION_PROPERTY = 29,
+    ICAL_DTEND_PROPERTY = 30,
+    ICAL_DTSTAMP_PROPERTY = 31,
+    ICAL_DTSTART_PROPERTY = 32,
+    ICAL_DUE_PROPERTY = 33,
+    ICAL_DURATION_PROPERTY = 34,
+    ICAL_ESTIMATEDDURATION_PROPERTY = 113,
+    ICAL_EXDATE_PROPERTY = 35,
+    ICAL_EXPAND_PROPERTY = 36,
+    ICAL_EXRULE_PROPERTY = 37,
+    ICAL_FREEBUSY_PROPERTY = 38,
+    ICAL_GEO_PROPERTY = 39,
+    ICAL_GRANT_PROPERTY = 40,
+    ICAL_IMAGE_PROPERTY = 119,
+    ICAL_ITIPVERSION_PROPERTY = 41,
+    ICAL_LASTMODIFIED_PROPERTY = 42,
+    ICAL_LOCATION_PROPERTY = 43,
+    ICAL_MAXCOMPONENTSIZE_PROPERTY = 44,
+    ICAL_MAXDATE_PROPERTY = 45,
+    ICAL_MAXRESULTS_PROPERTY = 46,
+    ICAL_MAXRESULTSSIZE_PROPERTY = 47,
+    ICAL_METHOD_PROPERTY = 48,
+    ICAL_MINDATE_PROPERTY = 49,
+    ICAL_MULTIPART_PROPERTY = 50,
+    ICAL_NAME_PROPERTY = 115,
+    ICAL_ORGANIZER_PROPERTY = 52,
+    ICAL_OWNER_PROPERTY = 53,
+    ICAL_PERCENTCOMPLETE_PROPERTY = 54,
+    ICAL_PERMISSION_PROPERTY = 55,
+    ICAL_POLLCOMPLETION_PROPERTY = 110,
+    ICAL_POLLITEMID_PROPERTY = 103,
+    ICAL_POLLMODE_PROPERTY = 104,
+    ICAL_POLLPROPERTIES_PROPERTY = 105,
+    ICAL_POLLWINNER_PROPERTY = 106,
+    ICAL_PRIORITY_PROPERTY = 56,
+    ICAL_PRODID_PROPERTY = 57,
+    ICAL_QUERY_PROPERTY = 58,
+    ICAL_QUERYLEVEL_PROPERTY = 59,
+    ICAL_QUERYID_PROPERTY = 60,
+    ICAL_QUERYNAME_PROPERTY = 61,
+    ICAL_RDATE_PROPERTY = 62,
+    ICAL_RECURACCEPTED_PROPERTY = 63,
+    ICAL_RECUREXPAND_PROPERTY = 64,
+    ICAL_RECURLIMIT_PROPERTY = 65,
+    ICAL_RECURRENCEID_PROPERTY = 66,
+    ICAL_REFRESHINTERVAL_PROPERTY = 116,
+    ICAL_RELATEDTO_PROPERTY = 67,
+    ICAL_RELCALID_PROPERTY = 68,
+    ICAL_REPEAT_PROPERTY = 69,
+    ICAL_REPLYURL_PROPERTY = 111,
+    ICAL_REQUESTSTATUS_PROPERTY = 70,
+    ICAL_RESOURCES_PROPERTY = 71,
+    ICAL_RESPONSE_PROPERTY = 112,
+    ICAL_RESTRICTION_PROPERTY = 72,
+    ICAL_RRULE_PROPERTY = 73,
+    ICAL_SCOPE_PROPERTY = 74,
+    ICAL_SEQUENCE_PROPERTY = 75,
+    ICAL_SOURCE_PROPERTY = 117,
+    ICAL_STATUS_PROPERTY = 76,
+    ICAL_STORESEXPANDED_PROPERTY = 77,
+    ICAL_SUMMARY_PROPERTY = 78,
+    ICAL_TARGET_PROPERTY = 79,
+    ICAL_TASKMODE_PROPERTY = 114,
+    ICAL_TRANSP_PROPERTY = 80,
+    ICAL_TRIGGER_PROPERTY = 81,
+    ICAL_TZID_PROPERTY = 82,
+    ICAL_TZIDALIASOF_PROPERTY = 108,
+    ICAL_TZNAME_PROPERTY = 83,
+    ICAL_TZOFFSETFROM_PROPERTY = 84,
+    ICAL_TZOFFSETTO_PROPERTY = 85,
+    ICAL_TZUNTIL_PROPERTY = 109,
+    ICAL_TZURL_PROPERTY = 86,
+    ICAL_UID_PROPERTY = 87,
+    ICAL_URL_PROPERTY = 88,
+    ICAL_VERSION_PROPERTY = 89,
+    ICAL_VOTER_PROPERTY = 107,
+    ICAL_X_PROPERTY = 90,
+    ICAL_XLICCLASS_PROPERTY = 91,
+    ICAL_XLICCLUSTERCOUNT_PROPERTY = 92,
+    ICAL_XLICERROR_PROPERTY = 93,
+    ICAL_XLICMIMECHARSET_PROPERTY = 94,
+    ICAL_XLICMIMECID_PROPERTY = 95,
+    ICAL_XLICMIMECONTENTTYPE_PROPERTY = 96,
+    ICAL_XLICMIMEENCODING_PROPERTY = 97,
+    ICAL_XLICMIMEFILENAME_PROPERTY = 98,
+    ICAL_XLICMIMEOPTINFO_PROPERTY = 99,
     ICAL_NO_PROPERTY = 100
 } icalproperty_kind;
 /* ACCEPT-RESPONSE */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_acceptresponse(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_acceptresponse(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_acceptresponse(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_acceptresponse(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_acceptresponse(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_acceptresponse(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_acceptresponse(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_acceptresponse(const char * v, ...);
 /* ACKNOWLEDGED */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_acknowledged(struct icaltimetype v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_acknowledged(icalproperty* prop, struct icaltimetype v);
-LIBICAL_ICAL_EXPORT struct icaltimetype icalproperty_get_acknowledged(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_acknowledged(struct icaltimetype v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_acknowledged(struct icaltimetype v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_acknowledged(icalproperty *prop, struct icaltimetype v);
+LIBICAL_ICAL_EXPORT struct icaltimetype icalproperty_get_acknowledged(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_acknowledged(struct icaltimetype v, ...);
 /* ACTION */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_action(enum icalproperty_action v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_action(icalproperty* prop, enum icalproperty_action v);
-LIBICAL_ICAL_EXPORT enum icalproperty_action icalproperty_get_action(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_action(enum icalproperty_action v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_action(enum icalproperty_action v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_action(icalproperty *prop, enum icalproperty_action v);
+LIBICAL_ICAL_EXPORT enum icalproperty_action icalproperty_get_action(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_action(enum icalproperty_action v, ...);
 /* ALLOW-CONFLICT */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_allowconflict(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_allowconflict(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_allowconflict(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_allowconflict(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_allowconflict(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_allowconflict(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_allowconflict(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_allowconflict(const char * v, ...);
 /* ATTACH */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_attach(icalattach * v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_attach(icalproperty* prop, icalattach * v);
-LIBICAL_ICAL_EXPORT icalattach * icalproperty_get_attach(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_attach(icalattach * v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_attach(icalattach * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_attach(icalproperty *prop, icalattach * v);
+LIBICAL_ICAL_EXPORT icalattach * icalproperty_get_attach(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_attach(icalattach * v, ...);
 /* ATTENDEE */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_attendee(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_attendee(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_attendee(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_attendee(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_attendee(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_attendee(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_attendee(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_attendee(const char * v, ...);
 /* BUSYTYPE */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_busytype(enum icalproperty_busytype v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_busytype(icalproperty* prop, enum icalproperty_busytype v);
-LIBICAL_ICAL_EXPORT enum icalproperty_busytype icalproperty_get_busytype(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_busytype(enum icalproperty_busytype v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_busytype(enum icalproperty_busytype v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_busytype(icalproperty *prop, enum icalproperty_busytype v);
+LIBICAL_ICAL_EXPORT enum icalproperty_busytype icalproperty_get_busytype(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_busytype(enum icalproperty_busytype v, ...);
 /* CALID */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_calid(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_calid(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_calid(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_calid(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_calid(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_calid(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_calid(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_calid(const char * v, ...);
 /* CALMASTER */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_calmaster(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_calmaster(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_calmaster(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_calmaster(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_calmaster(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_calmaster(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_calmaster(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_calmaster(const char * v, ...);
 /* CALSCALE */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_calscale(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_calscale(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_calscale(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_calscale(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_calscale(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_calscale(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_calscale(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_calscale(const char * v, ...);
 /* CAP-VERSION */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_capversion(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_capversion(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_capversion(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_capversion(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_capversion(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_capversion(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_capversion(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_capversion(const char * v, ...);
 /* CAR-LEVEL */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_carlevel(enum icalproperty_carlevel v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_carlevel(icalproperty* prop, enum icalproperty_carlevel v);
-LIBICAL_ICAL_EXPORT enum icalproperty_carlevel icalproperty_get_carlevel(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_carlevel(enum icalproperty_carlevel v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_carlevel(enum icalproperty_carlevel v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_carlevel(icalproperty *prop, enum icalproperty_carlevel v);
+LIBICAL_ICAL_EXPORT enum icalproperty_carlevel icalproperty_get_carlevel(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_carlevel(enum icalproperty_carlevel v, ...);
 /* CARID */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_carid(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_carid(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_carid(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_carid(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_carid(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_carid(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_carid(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_carid(const char * v, ...);
 /* CATEGORIES */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_categories(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_categories(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_categories(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_categories(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_categories(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_categories(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_categories(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_categories(const char * v, ...);
 /* CLASS */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_class(enum icalproperty_class v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_class(icalproperty* prop, enum icalproperty_class v);
-LIBICAL_ICAL_EXPORT enum icalproperty_class icalproperty_get_class(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_class(enum icalproperty_class v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_class(enum icalproperty_class v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_class(icalproperty *prop, enum icalproperty_class v);
+LIBICAL_ICAL_EXPORT enum icalproperty_class icalproperty_get_class(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_class(enum icalproperty_class v, ...);
 /* CMD */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_cmd(enum icalproperty_cmd v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_cmd(icalproperty* prop, enum icalproperty_cmd v);
-LIBICAL_ICAL_EXPORT enum icalproperty_cmd icalproperty_get_cmd(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_cmd(enum icalproperty_cmd v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_cmd(enum icalproperty_cmd v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_cmd(icalproperty *prop, enum icalproperty_cmd v);
+LIBICAL_ICAL_EXPORT enum icalproperty_cmd icalproperty_get_cmd(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_cmd(enum icalproperty_cmd v, ...);
+/* COLOR */
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_color(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_color(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_color(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_color(const char * v, ...);
 /* COMMENT */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_comment(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_comment(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_comment(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_comment(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_comment(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_comment(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_comment(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_comment(const char * v, ...);
 /* COMPLETED */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_completed(struct icaltimetype v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_completed(icalproperty* prop, struct icaltimetype v);
-LIBICAL_ICAL_EXPORT struct icaltimetype icalproperty_get_completed(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_completed(struct icaltimetype v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_completed(struct icaltimetype v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_completed(icalproperty *prop, struct icaltimetype v);
+LIBICAL_ICAL_EXPORT struct icaltimetype icalproperty_get_completed(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_completed(struct icaltimetype v, ...);
 /* COMPONENTS */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_components(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_components(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_components(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_components(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_components(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_components(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_components(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_components(const char * v, ...);
+/* CONFERENCE */
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_conference(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_conference(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_conference(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_conference(const char * v, ...);
 /* CONTACT */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_contact(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_contact(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_contact(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_contact(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_contact(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_contact(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_contact(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_contact(const char * v, ...);
 /* CREATED */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_created(struct icaltimetype v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_created(icalproperty* prop, struct icaltimetype v);
-LIBICAL_ICAL_EXPORT struct icaltimetype icalproperty_get_created(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_created(struct icaltimetype v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_created(struct icaltimetype v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_created(icalproperty *prop, struct icaltimetype v);
+LIBICAL_ICAL_EXPORT struct icaltimetype icalproperty_get_created(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_created(struct icaltimetype v, ...);
 /* CSID */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_csid(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_csid(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_csid(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_csid(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_csid(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_csid(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_csid(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_csid(const char * v, ...);
 /* DATE-MAX */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_datemax(struct icaltimetype v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_datemax(icalproperty* prop, struct icaltimetype v);
-LIBICAL_ICAL_EXPORT struct icaltimetype icalproperty_get_datemax(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_datemax(struct icaltimetype v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_datemax(struct icaltimetype v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_datemax(icalproperty *prop, struct icaltimetype v);
+LIBICAL_ICAL_EXPORT struct icaltimetype icalproperty_get_datemax(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_datemax(struct icaltimetype v, ...);
 /* DATE-MIN */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_datemin(struct icaltimetype v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_datemin(icalproperty* prop, struct icaltimetype v);
-LIBICAL_ICAL_EXPORT struct icaltimetype icalproperty_get_datemin(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_datemin(struct icaltimetype v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_datemin(struct icaltimetype v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_datemin(icalproperty *prop, struct icaltimetype v);
+LIBICAL_ICAL_EXPORT struct icaltimetype icalproperty_get_datemin(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_datemin(struct icaltimetype v, ...);
 /* DECREED */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_decreed(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_decreed(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_decreed(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_decreed(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_decreed(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_decreed(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_decreed(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_decreed(const char * v, ...);
 /* DEFAULT-CHARSET */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_defaultcharset(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_defaultcharset(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_defaultcharset(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_defaultcharset(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_defaultcharset(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_defaultcharset(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_defaultcharset(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_defaultcharset(const char * v, ...);
 /* DEFAULT-LOCALE */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_defaultlocale(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_defaultlocale(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_defaultlocale(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_defaultlocale(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_defaultlocale(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_defaultlocale(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_defaultlocale(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_defaultlocale(const char * v, ...);
 /* DEFAULT-TZID */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_defaulttzid(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_defaulttzid(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_defaulttzid(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_defaulttzid(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_defaulttzid(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_defaulttzid(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_defaulttzid(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_defaulttzid(const char * v, ...);
 /* DEFAULT-VCARS */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_defaultvcars(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_defaultvcars(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_defaultvcars(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_defaultvcars(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_defaultvcars(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_defaultvcars(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_defaultvcars(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_defaultvcars(const char * v, ...);
 /* DENY */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_deny(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_deny(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_deny(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_deny(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_deny(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_deny(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_deny(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_deny(const char * v, ...);
 /* DESCRIPTION */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_description(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_description(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_description(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_description(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_description(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_description(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_description(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_description(const char * v, ...);
 /* DTEND */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_dtend(struct icaltimetype v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_dtend(icalproperty* prop, struct icaltimetype v);
-LIBICAL_ICAL_EXPORT struct icaltimetype icalproperty_get_dtend(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_dtend(struct icaltimetype v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_dtend(struct icaltimetype v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_dtend(icalproperty *prop, struct icaltimetype v);
+LIBICAL_ICAL_EXPORT struct icaltimetype icalproperty_get_dtend(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_dtend(struct icaltimetype v, ...);
 /* DTSTAMP */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_dtstamp(struct icaltimetype v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_dtstamp(icalproperty* prop, struct icaltimetype v);
-LIBICAL_ICAL_EXPORT struct icaltimetype icalproperty_get_dtstamp(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_dtstamp(struct icaltimetype v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_dtstamp(struct icaltimetype v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_dtstamp(icalproperty *prop, struct icaltimetype v);
+LIBICAL_ICAL_EXPORT struct icaltimetype icalproperty_get_dtstamp(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_dtstamp(struct icaltimetype v, ...);
 /* DTSTART */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_dtstart(struct icaltimetype v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_dtstart(icalproperty* prop, struct icaltimetype v);
-LIBICAL_ICAL_EXPORT struct icaltimetype icalproperty_get_dtstart(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_dtstart(struct icaltimetype v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_dtstart(struct icaltimetype v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_dtstart(icalproperty *prop, struct icaltimetype v);
+LIBICAL_ICAL_EXPORT struct icaltimetype icalproperty_get_dtstart(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_dtstart(struct icaltimetype v, ...);
 /* DUE */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_due(struct icaltimetype v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_due(icalproperty* prop, struct icaltimetype v);
-LIBICAL_ICAL_EXPORT struct icaltimetype icalproperty_get_due(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_due(struct icaltimetype v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_due(struct icaltimetype v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_due(icalproperty *prop, struct icaltimetype v);
+LIBICAL_ICAL_EXPORT struct icaltimetype icalproperty_get_due(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_due(struct icaltimetype v, ...);
 /* DURATION */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_duration(struct icaldurationtype v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_duration(icalproperty* prop, struct icaldurationtype v);
-LIBICAL_ICAL_EXPORT struct icaldurationtype icalproperty_get_duration(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_duration(struct icaldurationtype v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_duration(struct icaldurationtype v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_duration(icalproperty *prop, struct icaldurationtype v);
+LIBICAL_ICAL_EXPORT struct icaldurationtype icalproperty_get_duration(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_duration(struct icaldurationtype v, ...);
 /* ESTIMATED-DURATION */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_estimatedduration(struct icaldurationtype v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_estimatedduration(icalproperty* prop, struct icaldurationtype v);
-LIBICAL_ICAL_EXPORT struct icaldurationtype icalproperty_get_estimatedduration(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_estimatedduration(struct icaldurationtype v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_estimatedduration(struct icaldurationtype v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_estimatedduration(icalproperty *prop, struct icaldurationtype v);
+LIBICAL_ICAL_EXPORT struct icaldurationtype icalproperty_get_estimatedduration(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_estimatedduration(struct icaldurationtype v, ...);
 /* EXDATE */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_exdate(struct icaltimetype v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_exdate(icalproperty* prop, struct icaltimetype v);
-LIBICAL_ICAL_EXPORT struct icaltimetype icalproperty_get_exdate(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_exdate(struct icaltimetype v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_exdate(struct icaltimetype v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_exdate(icalproperty *prop, struct icaltimetype v);
+LIBICAL_ICAL_EXPORT struct icaltimetype icalproperty_get_exdate(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_exdate(struct icaltimetype v, ...);
 /* EXPAND */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_expand(int v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_expand(icalproperty* prop, int v);
-LIBICAL_ICAL_EXPORT int icalproperty_get_expand(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_expand(int v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_expand(int v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_expand(icalproperty *prop, int v);
+LIBICAL_ICAL_EXPORT int icalproperty_get_expand(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_expand(int v, ...);
 /* EXRULE */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_exrule(struct icalrecurrencetype v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_exrule(icalproperty* prop, struct icalrecurrencetype v);
-LIBICAL_ICAL_EXPORT struct icalrecurrencetype icalproperty_get_exrule(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_exrule(struct icalrecurrencetype v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_exrule(struct icalrecurrencetype v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_exrule(icalproperty *prop, struct icalrecurrencetype v);
+LIBICAL_ICAL_EXPORT struct icalrecurrencetype icalproperty_get_exrule(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_exrule(struct icalrecurrencetype v, ...);
 /* FREEBUSY */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_freebusy(struct icalperiodtype v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_freebusy(icalproperty* prop, struct icalperiodtype v);
-LIBICAL_ICAL_EXPORT struct icalperiodtype icalproperty_get_freebusy(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_freebusy(struct icalperiodtype v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_freebusy(struct icalperiodtype v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_freebusy(icalproperty *prop, struct icalperiodtype v);
+LIBICAL_ICAL_EXPORT struct icalperiodtype icalproperty_get_freebusy(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_freebusy(struct icalperiodtype v, ...);
 /* GEO */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_geo(struct icalgeotype v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_geo(icalproperty* prop, struct icalgeotype v);
-LIBICAL_ICAL_EXPORT struct icalgeotype icalproperty_get_geo(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_geo(struct icalgeotype v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_geo(struct icalgeotype v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_geo(icalproperty *prop, struct icalgeotype v);
+LIBICAL_ICAL_EXPORT struct icalgeotype icalproperty_get_geo(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_geo(struct icalgeotype v, ...);
 /* GRANT */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_grant(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_grant(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_grant(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_grant(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_grant(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_grant(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_grant(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_grant(const char * v, ...);
+/* IMAGE */
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_image(icalattach * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_image(icalproperty *prop, icalattach * v);
+LIBICAL_ICAL_EXPORT icalattach * icalproperty_get_image(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_image(icalattach * v, ...);
 /* ITIP-VERSION */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_itipversion(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_itipversion(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_itipversion(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_itipversion(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_itipversion(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_itipversion(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_itipversion(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_itipversion(const char * v, ...);
 /* LAST-MODIFIED */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_lastmodified(struct icaltimetype v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_lastmodified(icalproperty* prop, struct icaltimetype v);
-LIBICAL_ICAL_EXPORT struct icaltimetype icalproperty_get_lastmodified(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_lastmodified(struct icaltimetype v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_lastmodified(struct icaltimetype v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_lastmodified(icalproperty *prop, struct icaltimetype v);
+LIBICAL_ICAL_EXPORT struct icaltimetype icalproperty_get_lastmodified(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_lastmodified(struct icaltimetype v, ...);
 /* LOCATION */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_location(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_location(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_location(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_location(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_location(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_location(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_location(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_location(const char * v, ...);
 /* MAX-COMPONENT-SIZE */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_maxcomponentsize(int v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_maxcomponentsize(icalproperty* prop, int v);
-LIBICAL_ICAL_EXPORT int icalproperty_get_maxcomponentsize(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_maxcomponentsize(int v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_maxcomponentsize(int v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_maxcomponentsize(icalproperty *prop, int v);
+LIBICAL_ICAL_EXPORT int icalproperty_get_maxcomponentsize(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_maxcomponentsize(int v, ...);
 /* MAXDATE */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_maxdate(struct icaltimetype v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_maxdate(icalproperty* prop, struct icaltimetype v);
-LIBICAL_ICAL_EXPORT struct icaltimetype icalproperty_get_maxdate(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_maxdate(struct icaltimetype v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_maxdate(struct icaltimetype v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_maxdate(icalproperty *prop, struct icaltimetype v);
+LIBICAL_ICAL_EXPORT struct icaltimetype icalproperty_get_maxdate(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_maxdate(struct icaltimetype v, ...);
 /* MAXRESULTS */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_maxresults(int v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_maxresults(icalproperty* prop, int v);
-LIBICAL_ICAL_EXPORT int icalproperty_get_maxresults(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_maxresults(int v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_maxresults(int v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_maxresults(icalproperty *prop, int v);
+LIBICAL_ICAL_EXPORT int icalproperty_get_maxresults(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_maxresults(int v, ...);
 /* MAXRESULTSSIZE */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_maxresultssize(int v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_maxresultssize(icalproperty* prop, int v);
-LIBICAL_ICAL_EXPORT int icalproperty_get_maxresultssize(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_maxresultssize(int v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_maxresultssize(int v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_maxresultssize(icalproperty *prop, int v);
+LIBICAL_ICAL_EXPORT int icalproperty_get_maxresultssize(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_maxresultssize(int v, ...);
 /* METHOD */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_method(enum icalproperty_method v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_method(icalproperty* prop, enum icalproperty_method v);
-LIBICAL_ICAL_EXPORT enum icalproperty_method icalproperty_get_method(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_method(enum icalproperty_method v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_method(enum icalproperty_method v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_method(icalproperty *prop, enum icalproperty_method v);
+LIBICAL_ICAL_EXPORT enum icalproperty_method icalproperty_get_method(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_method(enum icalproperty_method v, ...);
 /* MINDATE */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_mindate(struct icaltimetype v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_mindate(icalproperty* prop, struct icaltimetype v);
-LIBICAL_ICAL_EXPORT struct icaltimetype icalproperty_get_mindate(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_mindate(struct icaltimetype v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_mindate(struct icaltimetype v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_mindate(icalproperty *prop, struct icaltimetype v);
+LIBICAL_ICAL_EXPORT struct icaltimetype icalproperty_get_mindate(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_mindate(struct icaltimetype v, ...);
 /* MULTIPART */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_multipart(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_multipart(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_multipart(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_multipart(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_multipart(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_multipart(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_multipart(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_multipart(const char * v, ...);
 /* NAME */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_name(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_name(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_name(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_name(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_name(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_name(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_name(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_name(const char * v, ...);
 /* ORGANIZER */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_organizer(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_organizer(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_organizer(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_organizer(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_organizer(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_organizer(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_organizer(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_organizer(const char * v, ...);
 /* OWNER */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_owner(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_owner(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_owner(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_owner(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_owner(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_owner(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_owner(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_owner(const char * v, ...);
 /* PERCENT-COMPLETE */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_percentcomplete(int v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_percentcomplete(icalproperty* prop, int v);
-LIBICAL_ICAL_EXPORT int icalproperty_get_percentcomplete(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_percentcomplete(int v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_percentcomplete(int v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_percentcomplete(icalproperty *prop, int v);
+LIBICAL_ICAL_EXPORT int icalproperty_get_percentcomplete(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_percentcomplete(int v, ...);
 /* PERMISSION */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_permission(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_permission(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_permission(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_permission(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_permission(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_permission(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_permission(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_permission(const char * v, ...);
 /* POLL-COMPLETION */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_pollcompletion(enum icalproperty_pollcompletion v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_pollcompletion(icalproperty* prop, enum icalproperty_pollcompletion v);
-LIBICAL_ICAL_EXPORT enum icalproperty_pollcompletion icalproperty_get_pollcompletion(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_pollcompletion(enum icalproperty_pollcompletion v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_pollcompletion(enum icalproperty_pollcompletion v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_pollcompletion(icalproperty *prop, enum icalproperty_pollcompletion v);
+LIBICAL_ICAL_EXPORT enum icalproperty_pollcompletion icalproperty_get_pollcompletion(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_pollcompletion(enum icalproperty_pollcompletion v, ...);
 /* POLL-ITEM-ID */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_pollitemid(int v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_pollitemid(icalproperty* prop, int v);
-LIBICAL_ICAL_EXPORT int icalproperty_get_pollitemid(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_pollitemid(int v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_pollitemid(int v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_pollitemid(icalproperty *prop, int v);
+LIBICAL_ICAL_EXPORT int icalproperty_get_pollitemid(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_pollitemid(int v, ...);
 /* POLL-MODE */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_pollmode(enum icalproperty_pollmode v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_pollmode(icalproperty* prop, enum icalproperty_pollmode v);
-LIBICAL_ICAL_EXPORT enum icalproperty_pollmode icalproperty_get_pollmode(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_pollmode(enum icalproperty_pollmode v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_pollmode(enum icalproperty_pollmode v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_pollmode(icalproperty *prop, enum icalproperty_pollmode v);
+LIBICAL_ICAL_EXPORT enum icalproperty_pollmode icalproperty_get_pollmode(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_pollmode(enum icalproperty_pollmode v, ...);
 /* POLL-PROPERTIES */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_pollproperties(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_pollproperties(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_pollproperties(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_pollproperties(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_pollproperties(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_pollproperties(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_pollproperties(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_pollproperties(const char * v, ...);
 /* POLL-WINNER */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_pollwinner(int v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_pollwinner(icalproperty* prop, int v);
-LIBICAL_ICAL_EXPORT int icalproperty_get_pollwinner(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_pollwinner(int v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_pollwinner(int v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_pollwinner(icalproperty *prop, int v);
+LIBICAL_ICAL_EXPORT int icalproperty_get_pollwinner(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_pollwinner(int v, ...);
 /* PRIORITY */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_priority(int v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_priority(icalproperty* prop, int v);
-LIBICAL_ICAL_EXPORT int icalproperty_get_priority(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_priority(int v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_priority(int v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_priority(icalproperty *prop, int v);
+LIBICAL_ICAL_EXPORT int icalproperty_get_priority(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_priority(int v, ...);
 /* PRODID */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_prodid(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_prodid(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_prodid(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_prodid(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_prodid(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_prodid(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_prodid(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_prodid(const char * v, ...);
 /* QUERY */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_query(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_query(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_query(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_query(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_query(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_query(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_query(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_query(const char * v, ...);
 /* QUERY-LEVEL */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_querylevel(enum icalproperty_querylevel v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_querylevel(icalproperty* prop, enum icalproperty_querylevel v);
-LIBICAL_ICAL_EXPORT enum icalproperty_querylevel icalproperty_get_querylevel(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_querylevel(enum icalproperty_querylevel v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_querylevel(enum icalproperty_querylevel v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_querylevel(icalproperty *prop, enum icalproperty_querylevel v);
+LIBICAL_ICAL_EXPORT enum icalproperty_querylevel icalproperty_get_querylevel(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_querylevel(enum icalproperty_querylevel v, ...);
 /* QUERYID */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_queryid(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_queryid(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_queryid(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_queryid(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_queryid(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_queryid(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_queryid(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_queryid(const char * v, ...);
 /* QUERYNAME */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_queryname(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_queryname(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_queryname(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_queryname(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_queryname(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_queryname(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_queryname(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_queryname(const char * v, ...);
 /* RDATE */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_rdate(struct icaldatetimeperiodtype v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_rdate(icalproperty* prop, struct icaldatetimeperiodtype v);
-LIBICAL_ICAL_EXPORT struct icaldatetimeperiodtype icalproperty_get_rdate(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_rdate(struct icaldatetimeperiodtype v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_rdate(struct icaldatetimeperiodtype v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_rdate(icalproperty *prop, struct icaldatetimeperiodtype v);
+LIBICAL_ICAL_EXPORT struct icaldatetimeperiodtype icalproperty_get_rdate(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_rdate(struct icaldatetimeperiodtype v, ...);
 /* RECUR-ACCEPTED */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_recuraccepted(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_recuraccepted(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_recuraccepted(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_recuraccepted(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_recuraccepted(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_recuraccepted(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_recuraccepted(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_recuraccepted(const char * v, ...);
 /* RECUR-EXPAND */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_recurexpand(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_recurexpand(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_recurexpand(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_recurexpand(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_recurexpand(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_recurexpand(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_recurexpand(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_recurexpand(const char * v, ...);
 /* RECUR-LIMIT */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_recurlimit(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_recurlimit(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_recurlimit(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_recurlimit(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_recurlimit(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_recurlimit(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_recurlimit(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_recurlimit(const char * v, ...);
 /* RECURRENCE-ID */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_recurrenceid(struct icaltimetype v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_recurrenceid(icalproperty* prop, struct icaltimetype v);
-LIBICAL_ICAL_EXPORT struct icaltimetype icalproperty_get_recurrenceid(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_recurrenceid(struct icaltimetype v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_recurrenceid(struct icaltimetype v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_recurrenceid(icalproperty *prop, struct icaltimetype v);
+LIBICAL_ICAL_EXPORT struct icaltimetype icalproperty_get_recurrenceid(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_recurrenceid(struct icaltimetype v, ...);
+/* REFRESH-INTERVAL */
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_refreshinterval(struct icaldurationtype v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_refreshinterval(icalproperty *prop, struct icaldurationtype v);
+LIBICAL_ICAL_EXPORT struct icaldurationtype icalproperty_get_refreshinterval(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_refreshinterval(struct icaldurationtype v, ...);
 /* RELATED-TO */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_relatedto(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_relatedto(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_relatedto(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_relatedto(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_relatedto(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_relatedto(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_relatedto(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_relatedto(const char * v, ...);
 /* RELCALID */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_relcalid(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_relcalid(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_relcalid(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_relcalid(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_relcalid(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_relcalid(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_relcalid(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_relcalid(const char * v, ...);
 /* REPEAT */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_repeat(int v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_repeat(icalproperty* prop, int v);
-LIBICAL_ICAL_EXPORT int icalproperty_get_repeat(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_repeat(int v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_repeat(int v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_repeat(icalproperty *prop, int v);
+LIBICAL_ICAL_EXPORT int icalproperty_get_repeat(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_repeat(int v, ...);
 /* REPLY-URL */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_replyurl(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_replyurl(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_replyurl(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_replyurl(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_replyurl(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_replyurl(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_replyurl(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_replyurl(const char * v, ...);
 /* REQUEST-STATUS */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_requeststatus(struct icalreqstattype v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_requeststatus(icalproperty* prop, struct icalreqstattype v);
-LIBICAL_ICAL_EXPORT struct icalreqstattype icalproperty_get_requeststatus(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_requeststatus(struct icalreqstattype v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_requeststatus(struct icalreqstattype v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_requeststatus(icalproperty *prop, struct icalreqstattype v);
+LIBICAL_ICAL_EXPORT struct icalreqstattype icalproperty_get_requeststatus(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_requeststatus(struct icalreqstattype v, ...);
 /* RESOURCES */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_resources(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_resources(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_resources(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_resources(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_resources(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_resources(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_resources(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_resources(const char * v, ...);
 /* RESPONSE */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_response(int v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_response(icalproperty* prop, int v);
-LIBICAL_ICAL_EXPORT int icalproperty_get_response(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_response(int v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_response(int v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_response(icalproperty *prop, int v);
+LIBICAL_ICAL_EXPORT int icalproperty_get_response(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_response(int v, ...);
 /* RESTRICTION */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_restriction(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_restriction(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_restriction(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_restriction(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_restriction(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_restriction(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_restriction(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_restriction(const char * v, ...);
 /* RRULE */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_rrule(struct icalrecurrencetype v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_rrule(icalproperty* prop, struct icalrecurrencetype v);
-LIBICAL_ICAL_EXPORT struct icalrecurrencetype icalproperty_get_rrule(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_rrule(struct icalrecurrencetype v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_rrule(struct icalrecurrencetype v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_rrule(icalproperty *prop, struct icalrecurrencetype v);
+LIBICAL_ICAL_EXPORT struct icalrecurrencetype icalproperty_get_rrule(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_rrule(struct icalrecurrencetype v, ...);
 /* SCOPE */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_scope(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_scope(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_scope(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_scope(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_scope(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_scope(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_scope(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_scope(const char * v, ...);
 /* SEQUENCE */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_sequence(int v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_sequence(icalproperty* prop, int v);
-LIBICAL_ICAL_EXPORT int icalproperty_get_sequence(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_sequence(int v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_sequence(int v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_sequence(icalproperty *prop, int v);
+LIBICAL_ICAL_EXPORT int icalproperty_get_sequence(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_sequence(int v, ...);
+/* SOURCE */
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_source(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_source(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_source(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_source(const char * v, ...);
 /* STATUS */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_status(enum icalproperty_status v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_status(icalproperty* prop, enum icalproperty_status v);
-LIBICAL_ICAL_EXPORT enum icalproperty_status icalproperty_get_status(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_status(enum icalproperty_status v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_status(enum icalproperty_status v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_status(icalproperty *prop, enum icalproperty_status v);
+LIBICAL_ICAL_EXPORT enum icalproperty_status icalproperty_get_status(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_status(enum icalproperty_status v, ...);
 /* STORES-EXPANDED */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_storesexpanded(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_storesexpanded(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_storesexpanded(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_storesexpanded(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_storesexpanded(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_storesexpanded(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_storesexpanded(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_storesexpanded(const char * v, ...);
 /* SUMMARY */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_summary(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_summary(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_summary(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_summary(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_summary(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_summary(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_summary(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_summary(const char * v, ...);
 /* TARGET */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_target(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_target(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_target(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_target(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_target(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_target(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_target(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_target(const char * v, ...);
 /* TASK-MODE */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_taskmode(enum icalproperty_taskmode v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_taskmode(icalproperty* prop, enum icalproperty_taskmode v);
-LIBICAL_ICAL_EXPORT enum icalproperty_taskmode icalproperty_get_taskmode(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_taskmode(enum icalproperty_taskmode v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_taskmode(enum icalproperty_taskmode v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_taskmode(icalproperty *prop, enum icalproperty_taskmode v);
+LIBICAL_ICAL_EXPORT enum icalproperty_taskmode icalproperty_get_taskmode(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_taskmode(enum icalproperty_taskmode v, ...);
 /* TRANSP */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_transp(enum icalproperty_transp v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_transp(icalproperty* prop, enum icalproperty_transp v);
-LIBICAL_ICAL_EXPORT enum icalproperty_transp icalproperty_get_transp(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_transp(enum icalproperty_transp v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_transp(enum icalproperty_transp v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_transp(icalproperty *prop, enum icalproperty_transp v);
+LIBICAL_ICAL_EXPORT enum icalproperty_transp icalproperty_get_transp(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_transp(enum icalproperty_transp v, ...);
 /* TRIGGER */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_trigger(struct icaltriggertype v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_trigger(icalproperty* prop, struct icaltriggertype v);
-LIBICAL_ICAL_EXPORT struct icaltriggertype icalproperty_get_trigger(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_trigger(struct icaltriggertype v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_trigger(struct icaltriggertype v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_trigger(icalproperty *prop, struct icaltriggertype v);
+LIBICAL_ICAL_EXPORT struct icaltriggertype icalproperty_get_trigger(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_trigger(struct icaltriggertype v, ...);
 /* TZID */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_tzid(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_tzid(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_tzid(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_tzid(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_tzid(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_tzid(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_tzid(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_tzid(const char * v, ...);
 /* TZID-ALIAS-OF */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_tzidaliasof(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_tzidaliasof(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_tzidaliasof(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_tzidaliasof(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_tzidaliasof(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_tzidaliasof(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_tzidaliasof(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_tzidaliasof(const char * v, ...);
 /* TZNAME */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_tzname(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_tzname(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_tzname(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_tzname(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_tzname(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_tzname(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_tzname(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_tzname(const char * v, ...);
 /* TZOFFSETFROM */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_tzoffsetfrom(int v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_tzoffsetfrom(icalproperty* prop, int v);
-LIBICAL_ICAL_EXPORT int icalproperty_get_tzoffsetfrom(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_tzoffsetfrom(int v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_tzoffsetfrom(int v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_tzoffsetfrom(icalproperty *prop, int v);
+LIBICAL_ICAL_EXPORT int icalproperty_get_tzoffsetfrom(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_tzoffsetfrom(int v, ...);
 /* TZOFFSETTO */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_tzoffsetto(int v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_tzoffsetto(icalproperty* prop, int v);
-LIBICAL_ICAL_EXPORT int icalproperty_get_tzoffsetto(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_tzoffsetto(int v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_tzoffsetto(int v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_tzoffsetto(icalproperty *prop, int v);
+LIBICAL_ICAL_EXPORT int icalproperty_get_tzoffsetto(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_tzoffsetto(int v, ...);
 /* TZUNTIL */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_tzuntil(struct icaltimetype v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_tzuntil(icalproperty* prop, struct icaltimetype v);
-LIBICAL_ICAL_EXPORT struct icaltimetype icalproperty_get_tzuntil(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_tzuntil(struct icaltimetype v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_tzuntil(struct icaltimetype v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_tzuntil(icalproperty *prop, struct icaltimetype v);
+LIBICAL_ICAL_EXPORT struct icaltimetype icalproperty_get_tzuntil(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_tzuntil(struct icaltimetype v, ...);
 /* TZURL */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_tzurl(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_tzurl(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_tzurl(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_tzurl(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_tzurl(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_tzurl(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_tzurl(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_tzurl(const char * v, ...);
 /* UID */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_uid(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_uid(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_uid(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_uid(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_uid(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_uid(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_uid(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_uid(const char * v, ...);
 /* URL */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_url(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_url(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_url(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_url(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_url(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_url(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_url(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_url(const char * v, ...);
 /* VERSION */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_version(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_version(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_version(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_version(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_version(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_version(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_version(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_version(const char * v, ...);
 /* VOTER */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_voter(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_voter(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_voter(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_voter(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_voter(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_voter(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_voter(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_voter(const char * v, ...);
 /* X */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_x(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_x(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_x(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_x(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_x(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_x(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_x(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_x(const char * v, ...);
 /* X-LIC-CLASS */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_xlicclass(enum icalproperty_xlicclass v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_xlicclass(icalproperty* prop, enum icalproperty_xlicclass v);
-LIBICAL_ICAL_EXPORT enum icalproperty_xlicclass icalproperty_get_xlicclass(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_xlicclass(enum icalproperty_xlicclass v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_xlicclass(enum icalproperty_xlicclass v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_xlicclass(icalproperty *prop, enum icalproperty_xlicclass v);
+LIBICAL_ICAL_EXPORT enum icalproperty_xlicclass icalproperty_get_xlicclass(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_xlicclass(enum icalproperty_xlicclass v, ...);
 /* X-LIC-CLUSTERCOUNT */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_xlicclustercount(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_xlicclustercount(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_xlicclustercount(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_xlicclustercount(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_xlicclustercount(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_xlicclustercount(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_xlicclustercount(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_xlicclustercount(const char * v, ...);
 /* X-LIC-ERROR */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_xlicerror(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_xlicerror(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_xlicerror(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_xlicerror(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_xlicerror(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_xlicerror(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_xlicerror(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_xlicerror(const char * v, ...);
 /* X-LIC-MIMECHARSET */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_xlicmimecharset(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_xlicmimecharset(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_xlicmimecharset(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_xlicmimecharset(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_xlicmimecharset(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_xlicmimecharset(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_xlicmimecharset(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_xlicmimecharset(const char * v, ...);
 /* X-LIC-MIMECID */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_xlicmimecid(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_xlicmimecid(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_xlicmimecid(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_xlicmimecid(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_xlicmimecid(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_xlicmimecid(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_xlicmimecid(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_xlicmimecid(const char * v, ...);
 /* X-LIC-MIMECONTENTTYPE */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_xlicmimecontenttype(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_xlicmimecontenttype(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_xlicmimecontenttype(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_xlicmimecontenttype(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_xlicmimecontenttype(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_xlicmimecontenttype(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_xlicmimecontenttype(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_xlicmimecontenttype(const char * v, ...);
 /* X-LIC-MIMEENCODING */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_xlicmimeencoding(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_xlicmimeencoding(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_xlicmimeencoding(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_xlicmimeencoding(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_xlicmimeencoding(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_xlicmimeencoding(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_xlicmimeencoding(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_xlicmimeencoding(const char * v, ...);
 /* X-LIC-MIMEFILENAME */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_xlicmimefilename(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_xlicmimefilename(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_xlicmimefilename(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_xlicmimefilename(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_xlicmimefilename(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_xlicmimefilename(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_xlicmimefilename(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_xlicmimefilename(const char * v, ...);
 /* X-LIC-MIMEOPTINFO */
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_new_xlicmimeoptinfo(const char* v);
-LIBICAL_ICAL_EXPORT void icalproperty_set_xlicmimeoptinfo(icalproperty* prop, const char* v);
-LIBICAL_ICAL_EXPORT const char* icalproperty_get_xlicmimeoptinfo(const icalproperty* prop);
-LIBICAL_ICAL_EXPORT icalproperty* icalproperty_vanew_xlicmimeoptinfo(const char* v, ...);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_new_xlicmimeoptinfo(const char * v);
+LIBICAL_ICAL_EXPORT void icalproperty_set_xlicmimeoptinfo(icalproperty *prop, const char * v);
+LIBICAL_ICAL_EXPORT const char * icalproperty_get_xlicmimeoptinfo(const icalproperty *prop);
+LIBICAL_ICAL_EXPORT icalproperty *icalproperty_vanew_xlicmimeoptinfo(const char * v, ...);
 #endif /*ICALPROPERTY_H*/
 /*======================================================================
  FILE: icalproperty.h
@@ -2383,8 +2441,6 @@ LIBICAL_ICAL_EXPORT const char *icalproperty_get_parameter_as_string(icalpropert
                                                                      const char *name);
 LIBICAL_ICAL_EXPORT char *icalproperty_get_parameter_as_string_r(icalproperty *prop,
                                                                  const char *name);
-LIBICAL_ICAL_EXPORT void icalproperty_remove_parameter(icalproperty *prop,
-                                                       icalparameter_kind kind);
 LIBICAL_ICAL_EXPORT void icalproperty_remove_parameter_by_kind(icalproperty *prop,
                                                                icalparameter_kind kind);
 LIBICAL_ICAL_EXPORT void icalproperty_remove_parameter_by_name(icalproperty *prop,
@@ -2405,6 +2461,7 @@ LIBICAL_ICAL_EXPORT icalvalue *icalproperty_get_value(const icalproperty *prop);
 LIBICAL_ICAL_EXPORT const char *icalproperty_get_value_as_string(const icalproperty *prop);
 LIBICAL_ICAL_EXPORT char *icalproperty_get_value_as_string_r(const icalproperty *prop);
 LIBICAL_ICAL_EXPORT void icalvalue_set_parent(icalvalue *value, icalproperty *property);
+LIBICAL_ICAL_EXPORT icalproperty *icalvalue_get_parent(icalvalue *value);
 /* Deal with X properties */
 LIBICAL_ICAL_EXPORT void icalproperty_set_x_name(icalproperty *prop, const char *name);
 LIBICAL_ICAL_EXPORT const char *icalproperty_get_x_name(icalproperty *prop);
@@ -2415,6 +2472,8 @@ LIBICAL_ICAL_EXPORT const char *icalproperty_get_x_name(icalproperty *prop);
 LIBICAL_ICAL_EXPORT const char *icalproperty_get_property_name(const icalproperty *prop);
 LIBICAL_ICAL_EXPORT char *icalproperty_get_property_name_r(const icalproperty *prop);
 LIBICAL_ICAL_EXPORT icalvalue_kind icalparameter_value_to_value_kind(icalparameter_value value);
+LIBICAL_ICAL_EXPORT void icalparameter_set_parent(icalparameter *param, icalproperty *property);
+LIBICAL_ICAL_EXPORT icalproperty *icalparameter_get_parent(icalparameter *param);
 /* Convert kinds to string and get default value type */
 LIBICAL_ICAL_EXPORT icalvalue_kind icalproperty_kind_to_value_kind(icalproperty_kind kind);
 LIBICAL_ICAL_EXPORT icalproperty_kind icalproperty_value_kind_to_kind(icalvalue_kind kind);
@@ -2426,7 +2485,6 @@ LIBICAL_ICAL_EXPORT icalproperty_method icalproperty_string_to_method(const char
 LIBICAL_ICAL_EXPORT const char *icalproperty_method_to_string(icalproperty_method method);
 LIBICAL_ICAL_EXPORT const char *icalproperty_enum_to_string(int e);
 LIBICAL_ICAL_EXPORT char *icalproperty_enum_to_string_r(int e);
-LIBICAL_ICAL_EXPORT int icalproperty_string_to_enum(const char *str);
 LIBICAL_ICAL_EXPORT int icalproperty_kind_and_string_to_enum(const int kind, const char *str);
 LIBICAL_ICAL_EXPORT const char *icalproperty_status_to_string(icalproperty_status);
 LIBICAL_ICAL_EXPORT icalproperty_status icalproperty_string_to_status(const char *string);
@@ -2520,8 +2578,6 @@ LIBICAL_ICAL_EXPORT void pvl_apply(pvl_list l, pvl_applyf f, void *v);
 #define ICALCOMPONENT_H
 #include "libical_ical_export.h"
   /* defines icalcomponent_kind */
-
-
 typedef struct icalcomponent_impl icalcomponent;
 /* This is exposed so that callers will not have to allocate and
    deallocate iterators. Pretend that you can't see it. */
@@ -2550,6 +2606,8 @@ LIBICAL_ICAL_EXPORT void icalcomponent_remove_property(icalcomponent *component,
                                                        icalproperty *property);
 LIBICAL_ICAL_EXPORT int icalcomponent_count_properties(icalcomponent *component,
                                                        icalproperty_kind kind);
+LIBICAL_ICAL_EXPORT void icalproperty_set_parent(icalproperty *property,
+                                                 icalcomponent *component);
 LIBICAL_ICAL_EXPORT icalcomponent *icalproperty_get_parent(const icalproperty *property);
 /* Iterate through the properties */
 LIBICAL_ICAL_EXPORT icalproperty *icalcomponent_get_current_property(icalcomponent *component);
@@ -2718,7 +2776,6 @@ LIBICAL_ICAL_EXPORT icalcomponent *icalcomponent_new_xvote(void);
 #ifndef ICALTIMEZONE_H
 #define ICALTIMEZONE_H
 #include "libical_ical_export.h"
-
 #include <stdio.h>
 #if !defined(ICALTIMEZONE_DEFINED)
 #define ICALTIMEZONE_DEFINED
@@ -2818,7 +2875,7 @@ LIBICAL_ICAL_EXPORT char *icaltimezone_get_tznames_from_vtimezone(icalcomponent 
  * @par Handling the default location the timezone files
  */
 /** Set the directory to look for the zonefiles */
-LIBICAL_ICAL_EXPORT void set_zone_directory(char *path);
+LIBICAL_ICAL_EXPORT void set_zone_directory(const char *path);
 /** Free memory dedicated to the zonefile directory */
 LIBICAL_ICAL_EXPORT void free_zone_directory(void);
 LIBICAL_ICAL_EXPORT void icaltimezone_release_zone_tab(void);
@@ -2859,7 +2916,6 @@ extern const char *icaltimezone_tzid_prefix(void);
 #ifndef ICALTZUTIL_H
 #define ICALTZUTIL_H
 #include "libical_ical_export.h"
-
 #if defined(sun) && defined(__SVR4)
 #define ZONES_TAB_SYSTEM_FILENAME "tab/zone_sun.tab"
 #else
@@ -2889,7 +2945,6 @@ LIBICAL_ICAL_EXPORT int icaltzutil_get_exact_vtimezones_support(void);
 #ifndef ICALPARSER_H
 #define ICALPARSER_H
 #include "libical_ical_export.h"
-
 typedef struct icalparser_impl icalparser;
 /**
  * @file  icalparser.h
@@ -2930,9 +2985,6 @@ LIBICAL_ICAL_EXPORT icalcomponent *icalparser_parse_string(const char *str);
 /***********************************************************************
  * Parser support functions
  ***********************************************************************/
-/** Use the flex/bison parser to turn a string into a value type */
-LIBICAL_ICAL_EXPORT icalvalue *icalparser_parse_value(icalvalue_kind kind,
-                                                      const char *str, icalcomponent ** errors);
 /** Given a line generator function, return a single iCal content line.*/
 LIBICAL_ICAL_EXPORT char *icalparser_get_line(icalparser *parser,
                                               char *(*line_gen_func) (char *s,
@@ -3014,6 +3066,7 @@ LIBICAL_ICAL_EXPORT char *icalmemory_strdup(const char *s);
     icalerror_set_errno, so it does not appear in all of the macros below */
 LIBICAL_ICAL_EXPORT void icalerror_stop_here(void);
 LIBICAL_ICAL_EXPORT void icalerror_crash_here(void);
+#pragma GCC visibility push(default)
 typedef enum icalerrorenum
 {
     ICAL_NO_ERROR = 0,
@@ -3028,6 +3081,7 @@ typedef enum icalerrorenum
     ICAL_UNIMPLEMENTED_ERROR,
     ICAL_UNKNOWN_ERROR  /* Used for problems in input to icalerror_strerror() */
 } icalerrorenum;
+#pragma GCC visibility pop
 LIBICAL_ICAL_EXPORT icalerrorenum *icalerrno_return(void);
 #define icalerrno (*(icalerrno_return()))
 /** If true, libicu aborts after a call to icalerror_set_error
@@ -3044,7 +3098,6 @@ LIBICAL_ICAL_EXPORT int icalerror_get_errors_are_fatal(void);
 #define icalerror_warn(message) ;{fprintf(stderr, "%s:%d: %s\n", __FILE__, __LINE__, message);}
 #endif /* __GNU_C__ */
 LIBICAL_ICAL_EXPORT void icalerror_clear_errno(void);
-LIBICAL_ICAL_EXPORT void _icalerror_set_errno(icalerrorenum);
 /* Make an individual error fatal or non-fatal. */
 typedef enum icalerrorstate
 {
@@ -3117,8 +3170,6 @@ LIBICAL_ICAL_EXPORT void icalerror_restore(const char *error, icalerrorstate es)
 #ifndef ICALRESTRICTION_H
 #define ICALRESTRICTION_H
 #include "libical_ical_export.h"
-
-
 /* These must stay in this order for icalrestriction_compare to work */
 typedef enum icalrestriction_kind
 {
@@ -3266,12 +3317,9 @@ LIBICAL_ICAL_EXPORT int sspm_write_mime(struct sspm_part *parts, size_t num_part
 #ifndef ICALMIME_H
 #define ICALMIME_H
 #include "libical_ical_export.h"
-
 LIBICAL_ICAL_EXPORT icalcomponent *icalmime_parse(char *(*line_gen_func) (char *s,
                                                                           size_t size,
                                                                           void *d), void *data);
-/* The inverse of icalmime_parse, not implemented yet. Use sspm.h directly.  */
-LIBICAL_ICAL_EXPORT char *icalmime_as_mime_string(char *component);
 #endif /* !ICALMIME_H */
 /*======================================================================
  FILE: icallangbind.h
@@ -3289,16 +3337,9 @@ LIBICAL_ICAL_EXPORT char *icalmime_as_mime_string(char *component);
 #ifndef ICALLANGBIND_H
 #define ICALLANGBIND_H
 #include "libical_ical_export.h"
-
-
 LIBICAL_ICAL_EXPORT int *icallangbind_new_array(int size);
 LIBICAL_ICAL_EXPORT void icallangbind_free_array(int *array);
 LIBICAL_ICAL_EXPORT int icallangbind_access_array(int *array, int index);
-LIBICAL_ICAL_EXPORT icalproperty *icallangbind_get_property(icalcomponent *c,
-                                                            int n, const char *prop);
-LIBICAL_ICAL_EXPORT const char *icallangbind_get_property_val(icalproperty *p);
-LIBICAL_ICAL_EXPORT const char *icallangbind_get_parameter(icalproperty *p, const char *parameter);
-LIBICAL_ICAL_EXPORT icalcomponent *icallangbind_get_component(icalcomponent *c, const char *comp);
 LIBICAL_ICAL_EXPORT icalproperty *icallangbind_get_first_property(icalcomponent *c,
                                                                   const char *prop);
 LIBICAL_ICAL_EXPORT icalproperty *icallangbind_get_next_property(icalcomponent *c,
@@ -3309,11 +3350,13 @@ LIBICAL_ICAL_EXPORT icalcomponent *icallangbind_get_next_component(icalcomponent
                                                                    const char *comp);
 LIBICAL_ICAL_EXPORT icalparameter *icallangbind_get_first_parameter(icalproperty *prop);
 LIBICAL_ICAL_EXPORT icalparameter *icallangbind_get_next_parameter(icalproperty *prop);
-LIBICAL_ICAL_EXPORT const char *icallangbind_property_eval_string(icalproperty *prop, char *sep);
-LIBICAL_ICAL_EXPORT char *icallangbind_property_eval_string_r(icalproperty *prop, char *sep);
+LIBICAL_ICAL_EXPORT const char *icallangbind_property_eval_string(icalproperty *prop,
+                                                                  const char *sep);
+LIBICAL_ICAL_EXPORT char *icallangbind_property_eval_string_r(icalproperty *prop,
+                                                              const char *sep);
 LIBICAL_ICAL_EXPORT int icallangbind_string_to_open_flag(const char *str);
 LIBICAL_ICAL_EXPORT const char *icallangbind_quote_as_ical(const char *str);
-LIBICAL_ICAL_EXPORT char *callangbind_quote_as_ical_r(const char *str);
+LIBICAL_ICAL_EXPORT char *icallangbind_quote_as_ical_r(const char *str);
 #endif
 
 #ifdef __cplusplus
