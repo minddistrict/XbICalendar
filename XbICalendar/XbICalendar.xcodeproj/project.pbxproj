@@ -146,7 +146,7 @@
 		F113ED40198643FD00C37F81 /* XbICalendarInviteWriteTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XbICalendarInviteWriteTests.m; sourceTree = "<group>"; };
 		F117D40619DBA6FC002CD9B5 /* XbICalendar2445Tests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = XbICalendar2445Tests.swift; sourceTree = "<group>"; };
 		F117D40819DBA7BB002CD9B5 /* XbICalendarTestsBridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = XbICalendarTestsBridge.h; sourceTree = "<group>"; };
-		F12F48EC19332EA4003631C5 /* XbICalendar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = XbICalendar.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F12F48EC19332EA4003631C5 /* XbICalendarExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = XbICalendarExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F12F48EF19332EA4003631C5 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		F12F48F119332EA4003631C5 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		F12F48F319332EA4003631C5 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
@@ -235,7 +235,7 @@
 		F12F48ED19332EA4003631C5 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				F12F48EC19332EA4003631C5 /* XbICalendar.app */,
+				F12F48EC19332EA4003631C5 /* XbICalendarExample.app */,
 				F12F490D19332EA5003631C5 /* XbICalendarTests.xctest */,
 			);
 			name = Products;
@@ -420,9 +420,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		F12F48EB19332EA4003631C5 /* XbICalendar */ = {
+		F12F48EB19332EA4003631C5 /* XbICalendarExample */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = F12F491E19332EA5003631C5 /* Build configuration list for PBXNativeTarget "XbICalendar" */;
+			buildConfigurationList = F12F491E19332EA5003631C5 /* Build configuration list for PBXNativeTarget "XbICalendarExample" */;
 			buildPhases = (
 				F12F48E819332EA4003631C5 /* Sources */,
 				F12F48E919332EA4003631C5 /* Frameworks */,
@@ -432,9 +432,9 @@
 			);
 			dependencies = (
 			);
-			name = XbICalendar;
+			name = XbICalendarExample;
 			productName = XbICalendar;
-			productReference = F12F48EC19332EA4003631C5 /* XbICalendar.app */;
+			productReference = F12F48EC19332EA4003631C5 /* XbICalendarExample.app */;
 			productType = "com.apple.product-type.application";
 		};
 		F12F490C19332EA4003631C5 /* XbICalendarTests */ = {
@@ -466,6 +466,7 @@
 				ORGANIZATIONNAME = GaltSoft;
 				TargetAttributes = {
 					F12F490C19332EA4003631C5 = {
+						LastSwiftMigration = 0820;
 						TestTargetID = F12F48EB19332EA4003631C5;
 					};
 				};
@@ -483,7 +484,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				F12F48EB19332EA4003631C5 /* XbICalendar */,
+				F12F48EB19332EA4003631C5 /* XbICalendarExample */,
 				F12F490C19332EA4003631C5 /* XbICalendarTests */,
 			);
 		};
@@ -603,7 +604,7 @@
 /* Begin PBXTargetDependency section */
 		F12F491319332EA5003631C5 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = F12F48EB19332EA4003631C5 /* XbICalendar */;
+			target = F12F48EB19332EA4003631C5 /* XbICalendarExample */;
 			targetProxy = F12F491219332EA5003631C5 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -769,6 +770,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = XbICalendarTests/XbICalendarTestsBridge.h;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
 				TEST_HOST = "$(BUNDLE_LOADER)";
 				WRAPPER_EXTENSION = xctest;
 			};
@@ -794,6 +796,7 @@
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = XbICalendarTests/XbICalendarTestsBridge.h;
+				SWIFT_VERSION = 3.0;
 				TEST_HOST = "$(BUNDLE_LOADER)";
 				WRAPPER_EXTENSION = xctest;
 			};
@@ -811,7 +814,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		F12F491E19332EA5003631C5 /* Build configuration list for PBXNativeTarget "XbICalendar" */ = {
+		F12F491E19332EA5003631C5 /* Build configuration list for PBXNativeTarget "XbICalendarExample" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				F12F491F19332EA5003631C5 /* Debug */,
