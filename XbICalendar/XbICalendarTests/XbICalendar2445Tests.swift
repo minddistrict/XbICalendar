@@ -27,20 +27,20 @@ class XbICalendar2445TestsSwift: XbICalendarIcsTest {
 
  func test_event_with_start_date ()
   {
-    let vEvent:  XbICVEvent  = self.componentAtIndex(0, kind:ICAL_VEVENT_COMPONENT, ofCalendarAtIndex:0) as  XbICVEvent;
+    let vEvent:  XbICVEvent  = self.component(at: 0, kind:ICAL_VEVENT_COMPONENT, ofCalendarAt:0) as  XbICVEvent;
 
     self.assertUtcDateString("19970714T170000Z",
-      isEqualToDate:vEvent.dateStart(),
+                             isEqualTo:vEvent.dateStart(),
       withFailureMessage:"event dateStart is incorrect");
   }
 
 
  func test_event_with_end_date()
   {
-    let vEvent:  XbICVEvent  = self.componentAtIndex(0, kind:ICAL_VEVENT_COMPONENT, ofCalendarAtIndex:0) as  XbICVEvent;
+    let vEvent:  XbICVEvent  = self.component(at: 0, kind:ICAL_VEVENT_COMPONENT, ofCalendarAt:0) as  XbICVEvent;
 
-   self.assertUtcDateString("19970715T035959Z",
-      isEqualToDate: vEvent.dateEnd(),
+    self.assertUtcDateString("19970715T035959Z",
+                             isEqualTo: vEvent.dateEnd(),
       withFailureMessage:"event dateEnd is incorrect");
   }
 
@@ -50,7 +50,7 @@ class XbICalendar2445TestsSwift: XbICalendarIcsTest {
     let vEvent: XbICVEvent = self.events[0] as! XbICVEvent
 
     self.assertUtcDateString("19970901T130000Z",
-    isEqualToDate:vEvent.dateStamp(),
+                             isEqualTo:vEvent.dateStamp(),
     withFailureMessage:"event dateStamp is incorrect");
 
   }
@@ -66,7 +66,7 @@ class XbICalendar2445TestsSwift: XbICalendarIcsTest {
 
  func test_event_with_organizer()
   {
-    let vEvent: XbICVEvent = self.componentAtIndex(0, kind:ICAL_VEVENT_COMPONENT, ofCalendarAtIndex:2) as XbICVEvent
+    let vEvent: XbICVEvent = self.component(at: 0, kind:ICAL_VEVENT_COMPONENT, ofCalendarAt:2) as XbICVEvent
 
     XCTAssertEqual(vEvent.organizer().emailAddress(), "MAILTO:jdoe@host1.com", "Unexpected event organizer");
 
@@ -74,28 +74,28 @@ class XbICalendar2445TestsSwift: XbICalendarIcsTest {
 
   func test_event_with_uid()
   {
-  let vEvent: XbICVEvent = self.componentAtIndex(0, kind:ICAL_VEVENT_COMPONENT, ofCalendarAtIndex:2) as XbICVEvent
+  let vEvent: XbICVEvent = self.component(at: 0, kind:ICAL_VEVENT_COMPONENT, ofCalendarAt:2) as XbICVEvent
 
-  XCTAssertEqual(vEvent.UID(), "uid3@host1.com", "Unexpected event UID");
+  XCTAssertEqual(vEvent.uid(), "uid3@host1.com", "Unexpected event UID");
   }
 
   func test_event_with_sequence()
   {
-    let vEvent: XbICVEvent = self.componentAtIndex(0, kind:ICAL_VEVENT_COMPONENT, ofCalendarAtIndex:2) as XbICVEvent
+    let vEvent: XbICVEvent = self.component(at: 0, kind:ICAL_VEVENT_COMPONENT, ofCalendarAt:2) as XbICVEvent
 
     XCTAssertEqual(vEvent.sequences().count, 1, "Unexpected sequence");
   }
 
   func test_event_with_multiline_description()
   {
- let vEvent: XbICVEvent = self.componentAtIndex(0, kind:ICAL_VEVENT_COMPONENT, ofCalendarAtIndex:2) as XbICVEvent
+ let vEvent: XbICVEvent = self.component(at: 0, kind:ICAL_VEVENT_COMPONENT, ofCalendarAt:2) as XbICVEvent
 
   XCTAssertEqual(vEvent.description(), "Discuss how we can test c&s interoperability\\nusing iCalendar and other IETF standards.", "Unexpected description");
   }
 
   func test_event_with_location ()
   {
-  let vEvent: XbICVEvent =  self.componentAtIndex(0, kind:ICAL_VEVENT_COMPONENT, ofCalendarAtIndex:2) as XbICVEvent
+  let vEvent: XbICVEvent =  self.component(at: 0, kind:ICAL_VEVENT_COMPONENT, ofCalendarAt:2) as XbICVEvent
   
   XCTAssertEqual(vEvent.location(), "LDB Lobby", "Unexpected location");
   }
