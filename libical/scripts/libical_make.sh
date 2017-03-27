@@ -13,14 +13,13 @@ fi
 
 
 # Select the desired iPhone SDK
-export SDKVER="9.1"
 export DEVROOT=`xcode-select --print-path`
 
 if [ "i386" = $ARCH ] || [ "x86_64" = $ARCH ]; then
-    export SDKROOT=$DEVROOT/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator${SDKVER}.sdk
+    export SDKROOT=$DEVROOT/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk
     export MIOS="-mios-simulator-version-min=7.1"
 else
-    export SDKROOT=$DEVROOT/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS${SDKVER}.sdk
+    export SDKROOT=$DEVROOT/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk
     export MIOS="-miphoneos-version-min=7.1"
 fi;
 export IOSROOT=$DEVROOT/Platforms/iPhoneOS.platform
