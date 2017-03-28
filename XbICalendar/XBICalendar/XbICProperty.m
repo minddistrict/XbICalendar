@@ -201,8 +201,8 @@
 -(icaltimetype ) icaltimetypeFromObject:(id) date isDate:(BOOL) isDate {
     icaltimetype   t = icaltime_null_time();
     if ([date isKindOfClass:[NSDate class]]) {
-        unsigned unitFlags = (isDate) ? NSYearCalendarUnit | NSMonthCalendarUnit |  NSDayCalendarUnit :
-        NSYearCalendarUnit | NSMonthCalendarUnit |  NSDayCalendarUnit | NSHourCalendarUnit | NSMinuteCalendarUnit | NSSecondCalendarUnit |NSTimeZoneCalendarUnit ;
+        unsigned unitFlags = (isDate) ? NSCalendarUnitYear | NSCalendarUnitMonth |  NSCalendarUnitDay :
+        NSCalendarUnitYear | NSCalendarUnitMonth |  NSCalendarUnitDay | NSCalendarUnitHour | NSCalendarUnitMinute | NSCalendarUnitSecond |NSCalendarUnitTimeZone ;
         
         NSCalendar * calendar = [NSCalendar currentCalendar];
         [calendar setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
