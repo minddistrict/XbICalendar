@@ -61,6 +61,7 @@
 		277F392C1E89339A007A5A3D /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F12F48FB19332EA4003631C5 /* main.m */; };
 		277F39301E894005007A5A3D /* recur.ics in Resources */ = {isa = PBXBuildFile; fileRef = 277F392F1E894005007A5A3D /* recur.ics */; };
 		277F39321E894026007A5A3D /* XbICalendarRecurTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277F39311E894026007A5A3D /* XbICalendarRecurTests.swift */; };
+		27F4AEAA1E8A560400BD9F24 /* XbICProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27F4AEA91E8A560400BD9F24 /* XbICProperty.swift */; };
 		4D0767EC197ADF440017ED72 /* overlaps.ics in Resources */ = {isa = PBXBuildFile; fileRef = 4D0767EB197ADF440017ED72 /* overlaps.ics */; };
 		4D0767F0197AE41A0017ED72 /* process-calendar.ics in Resources */ = {isa = PBXBuildFile; fileRef = 4D0767EF197AE41A0017ED72 /* process-calendar.ics */; };
 		4D0767F4197AFE200017ED72 /* process-incoming.ics in Resources */ = {isa = PBXBuildFile; fileRef = 4D0767F3197AFE200017ED72 /* process-incoming.ics */; };
@@ -129,6 +130,7 @@
 		277F39021E8926D2007A5A3D /* libical_ical_export.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = libical_ical_export.h; sourceTree = "<group>"; };
 		277F392F1E894005007A5A3D /* recur.ics */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = recur.ics; sourceTree = "<group>"; };
 		277F39311E894026007A5A3D /* XbICalendarRecurTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = XbICalendarRecurTests.swift; sourceTree = "<group>"; };
+		27F4AEA91E8A560400BD9F24 /* XbICProperty.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = XbICProperty.swift; sourceTree = "<group>"; };
 		4D0767EB197ADF440017ED72 /* overlaps.ics */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = overlaps.ics; sourceTree = "<group>"; };
 		4D0767ED197ADF5C0017ED72 /* XbICalendarOverlapTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XbICalendarOverlapTests.m; sourceTree = "<group>"; };
 		4D0767EF197AE41A0017ED72 /* process-calendar.ics */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "process-calendar.ics"; sourceTree = "<group>"; };
@@ -386,6 +388,7 @@
 				F1DC7726193F208500DB07D4 /* XbICPerson.m */,
 				F12F4E4319346AB6003631C5 /* XbICProperty.h */,
 				F12F4E4419346AB6003631C5 /* XbICProperty.m */,
+				27F4AEA91E8A560400BD9F24 /* XbICProperty.swift */,
 				F12F4E471935B259003631C5 /* XbICVCalendar.h */,
 				F12F4E481935B259003631C5 /* XbICVCalendar.m */,
 				F12F4E4B1935CF03003631C5 /* XbICVEvent.h */,
@@ -556,6 +559,7 @@
 				TargetAttributes = {
 					277F38E51E890B84007A5A3D = {
 						CreatedOnToolsVersion = 8.2.1;
+						LastSwiftMigration = 0820;
 						ProvisioningStyle = Automatic;
 					};
 					F12F490C19332EA4003631C5 = {
@@ -650,6 +654,7 @@
 				277F38F11E89269B007A5A3D /* XbICComponent.m in Sources */,
 				277F38F21E89269B007A5A3D /* XbICFile.m in Sources */,
 				277F38F31E89269B007A5A3D /* XbICPerson.m in Sources */,
+				27F4AEAA1E8A560400BD9F24 /* XbICProperty.swift in Sources */,
 				277F38F41E89269B007A5A3D /* XbICProperty.m in Sources */,
 				277F38F51E89269B007A5A3D /* XbICVCalendar.m in Sources */,
 				277F38F61E89269B007A5A3D /* XbICVEvent.m in Sources */,
@@ -747,6 +752,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -782,6 +788,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -937,6 +944,7 @@
 		F12F492219332EA5003631C5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CLANG_ENABLE_MODULES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
@@ -967,6 +975,7 @@
 		F12F492319332EA5003631C5 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CLANG_ENABLE_MODULES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",

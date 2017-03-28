@@ -3,6 +3,7 @@
 //
 
 #import "XBICalendar.h"
+#import <XbICalendar/XbICalendar-Swift.h>
 
 @interface XbICProperty ()
 
@@ -155,44 +156,6 @@
 }
 
 #pragma mark - Value Primatives
-
--(NSDate *) datetimeFromValue: (icalvalue *) v parameters: (NSDictionary *) parameters {
-    struct icaltimetype t = icalvalue_get_datetime(v);
-    
-    NSCalendar *calendar = [NSCalendar currentCalendar];
-    
-    NSDateComponents *components = [[NSDateComponents alloc] init];
-    [components setYear:t.year];
-    [components setMonth: t.month];
-    [components setDay:t.day];
-
-    [components setHour:t.hour];
-    [components setMinute: t.minute];
-    [components setSecond: t.second];
-
-    if (t.is_utc) {
-        [components setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
-    }
-    else {
-        
-        NSString * tzid = parameters[@"TZID"];
-        if (tzid) {
-            NSTimeZone * tz = [NSTimeZone timeZoneWithName:tzid];
-            [components setTimeZone: tz];
-        }
-        else {
-            [components setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
-            
-        }
-    }
-    
-    
-    // t.is_daylight
-    // t.is_date
-    NSDate * date =[calendar dateFromComponents: components];
-    return date;
-    
-}
 
 -(NSDate *) dateFromValue: (icalvalue *) v {
     return [self.dateFormatter dateFromString: [self stringFromValue:v]];
